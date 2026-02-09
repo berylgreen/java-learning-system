@@ -1,0 +1,107 @@
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+.app-header {
+  background-color: #242424;
+  color: white;
+  padding: 1rem;
+  border-bottom: 1px solid #444;
+}
+
+.app-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.content-pane {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  border-right: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+}
+
+.editor-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e1e1e;
+}
+
+.controls {
+  padding: 1rem;
+  background-color: #2d2d2d;
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid #444;
+}
+
+.terminal {
+  flex: 1;
+  background-color: #000;
+  color: #0f0;
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background-color: #333;
+  color: #ccc;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #444;
+}
+
+.terminal-body {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+
+.terminal-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.output {
+  color: #fff;
+}
+
+.error {
+  color: #ff5555;
+}
+
+.success {
+  color: #55ff55;
+}
+
+.run-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.run-button:hover {
+  background-color: #45a049;
+}

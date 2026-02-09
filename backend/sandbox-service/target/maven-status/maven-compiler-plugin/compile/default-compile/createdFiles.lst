@@ -1,0 +1,8 @@
+com\jls\sandbox\controller\SandboxController.class
+com\jls\sandbox\service\JShellService.class
+com\jls\sandbox\controller\HealthController.class
+com\jls\sandbox\model\ExecutionRequest.class
+com\jls\sandbox\SandboxApplication.class
+com\jls\sandbox\model\ExecutionResult$ExecutionResultBuilder.class
+com\jls\sandbox\model\ExecutionRequest$ExecutionRequestBuilder.class
+com\jls\sandbox\model\ExecutionResult.class

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:writing-plans)",
+      "mcp__plugin_oh-my-claudecode_x__wait_for_job",
+      "mcp__plugin_oh-my-claudecode_x__list_jobs",
+      "mcp__plugin_oh-my-claudecode_t__lsp_diagnostics_directory",
+      "Skill(superpowers:finishing-a-development-branch)"
+    ]
+  }
+}

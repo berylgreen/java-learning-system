@@ -1,0 +1,12 @@
+com\jls\course\model\Module$ModuleBuilder.class
+com\jls\course\CourseApplication.class
+com\jls\course\model\Course.class
+com\jls\course\repository\LessonRepository.class
+com\jls\course\model\Lesson$LessonBuilder.class
+com\jls\course\model\Course$CourseBuilder.class
+com\jls\course\model\Module.class
+com\jls\course\service\ImportService.class
+com\jls\course\controller\CourseController.class
+com\jls\course\repository\CourseRepository.class
+com\jls\course\model\Lesson.class
+com\jls\course\repository\ModuleRepository.class
