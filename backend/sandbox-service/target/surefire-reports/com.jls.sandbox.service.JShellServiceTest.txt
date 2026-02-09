@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.jls.sandbox.service.JShellServiceTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.378 s -- in com.jls.sandbox.service.JShellServiceTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.20 s -- in com.jls.sandbox.service.JShellServiceTest

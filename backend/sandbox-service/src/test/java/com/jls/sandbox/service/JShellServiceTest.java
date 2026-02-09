@@ -28,4 +28,17 @@ public class JShellServiceTest {
         assertTrue(result.isSuccess());
         assertEquals("Hello World" + System.lineSeparator(), result.getOutput());
     }
+
+    @Test
+    void testExecuteFullClassWithMain() {
+        String code = "public class HelloWorld {\n" +
+                "    public static void main(String[] args) {\n" +
+                "        System.out.println(\"Hello from Main\");\n" +
+                "    }\n" +
+                "}";
+        ExecutionResult result = jShellService.execute(code);
+        assertNotNull(result);
+        assertTrue(result.isSuccess(), "Execution failed: " + result.getError());
+        assertEquals("Hello from Main" + System.lineSeparator(), result.getOutput());
+    }
 }

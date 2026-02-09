@@ -4,18 +4,25 @@ import com.jls.sandbox.model.ExecutionResult;
 import jdk.jshell.JShell;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
+import jdk.jshell.SourceCodeAnalysis;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class JShellService {
 
     private static final long DEFAULT_TIMEOUT_SECONDS = 5;
+
+    private static final Pattern CLASS_NAME_PATTERN = Pattern.compile("class\\s+(\\w+)\\s*\\{");
+    private static final Pattern MAIN_METHOD_PATTERN = Pattern.compile("public\\s+static\\s+void\\s+main");
 
     private static final List<String> FORBIDDEN_PATTERNS = List.of(
             "System.exit",
@@ -48,38 +55,53 @@ public class JShellService {
                         .err(new PrintStream(err))
                         .build()) {
 
-                    String[] lines = code.split("\n");
+                    List<SnippetEvent> allEvents = new ArrayList<>();
+                    SourceCodeAnalysis analysis = jshell.sourceCodeAnalysis();
+                    String remaining = code;
+                    while (!remaining.isEmpty()) {
+                        SourceCodeAnalysis.CompletionInfo info = analysis.analyzeCompletion(remaining);
+                        if (!info.completeness().isComplete()) {
+                            break;
+                        }
+                        allEvents.addAll(jshell.eval(info.source()));
+                        remaining = info.remaining();
+                    }
+
                     String lastValue = "";
                     boolean success = true;
 
-                    for (String line : lines) {
-                        if (line.trim().isEmpty()) continue;
-                        List<SnippetEvent> events = jshell.eval(line);
-                        for (SnippetEvent event : events) {
-                            if (event.status() == Snippet.Status.VALID) {
-                                if (event.value() != null) {
-                                    lastValue = event.value();
-                                }
-                            } else if (event.status() == Snippet.Status.REJECTED ||
-                                       event.status() == Snippet.Status.DROPPED) {
-                                success = false;
-                                jshell.diagnostics(event.snippet()).forEach(d -> {
-                                    String msg = String.format("Error: %s\n", d.getMessage(null));
-                                    try {
-                                        err.write(msg.getBytes());
-                                    } catch (Exception ignored) {}
-                                });
+                    for (SnippetEvent event : allEvents) {
+                        if (event.status() == Snippet.Status.VALID) {
+                            if (event.value() != null) {
+                                lastValue = event.value();
                             }
-
-                            if (event.exception() != null) {
-                                success = false;
-                                String msg = String.format("Exception: %s\n", event.exception().getMessage());
+                        } else if (event.status() == Snippet.Status.REJECTED ||
+                                   event.status() == Snippet.Status.DROPPED) {
+                            success = false;
+                            jshell.diagnostics(event.snippet()).forEach(d -> {
+                                String msg = String.format("Error: %s\n", d.getMessage(null));
                                 try {
                                     err.write(msg.getBytes());
                                 } catch (Exception ignored) {}
-                            }
+                            });
                         }
-                        if (!success) break;
+
+                        if (event.exception() != null) {
+                            success = false;
+                            String msg = String.format("Exception: %s\n", event.exception().getMessage());
+                            try {
+                                err.write(msg.getBytes());
+                            } catch (Exception ignored) {}
+                        }
+                    }
+
+                    if (success) {
+                        Matcher nameMatcher = CLASS_NAME_PATTERN.matcher(code);
+                        Matcher mainMatcher = MAIN_METHOD_PATTERN.matcher(code);
+                        if (nameMatcher.find() && mainMatcher.find()) {
+                            String className = nameMatcher.group(1);
+                            jshell.eval(className + ".main(new String[0]);");
+                        }
                     }
 
                     return ExecutionResult.builder()
