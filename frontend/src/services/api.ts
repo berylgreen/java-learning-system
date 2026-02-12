@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8081/api/sandbox';
+const SANDBOX_API_BASE_URL = 'http://localhost:8081/api/sandbox';
+const COURSE_API_BASE_URL = 'http://localhost:8082/api/courses';
 
 export interface ExecutionResult {
   output: string;
@@ -9,9 +10,41 @@ export interface ExecutionResult {
   success: boolean;
 }
 
+export interface CourseSummary {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface LessonSummary {
+  id: number;
+  title: string;
+}
+
+export interface ModuleStructure {
+  id: number;
+  title: string;
+  orderIndex: number;
+  lessons: LessonSummary[];
+}
+
+export interface CourseStructure {
+  id: number;
+  title: string;
+  description?: string;
+  modules: ModuleStructure[];
+}
+
+export interface LessonDetail {
+  id: number;
+  title: string;
+  content?: string;
+  codeSnippet?: string;
+}
+
 export const executeCode = async (code: string): Promise<ExecutionResult> => {
   try {
-    const response = await axios.post<ExecutionResult>(`${API_BASE_URL}/execute`, {
+    const response = await axios.post<ExecutionResult>(`${SANDBOX_API_BASE_URL}/execute`, {
       code,
     });
     return response.data;
@@ -31,4 +64,19 @@ export const executeCode = async (code: string): Promise<ExecutionResult> => {
       success: false,
     };
   }
+};
+
+export const getCourses = async (): Promise<CourseSummary[]> => {
+  const response = await axios.get<CourseSummary[]>(COURSE_API_BASE_URL);
+  return response.data;
+};
+
+export const getCourseStructure = async (courseId: number): Promise<CourseStructure> => {
+  const response = await axios.get<CourseStructure>(`${COURSE_API_BASE_URL}/${courseId}/structure`);
+  return response.data;
+};
+
+export const getLessonDetail = async (lessonId: number): Promise<LessonDetail> => {
+  const response = await axios.get<LessonDetail>(`${COURSE_API_BASE_URL}/lessons/${lessonId}`);
+  return response.data;
 };

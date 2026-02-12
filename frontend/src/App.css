@@ -13,95 +13,235 @@
 }
 
 .app-header {
-  background-color: #242424;
-  color: white;
-  padding: 1rem;
-  border-bottom: 1px solid #444;
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid #374151;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .app-main {
-  display: flex;
+  display: grid;
+  grid-template-columns: 280px 1fr 1fr;
   flex: 1;
-  overflow: hidden;
+  min-height: 0;
+}
+
+.sidebar {
+  border-right: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  overflow: auto;
+  padding: 0.9rem;
+}
+
+.course-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.course-switcher label {
+  color: #374151;
+  font-size: 0.85rem;
+}
+
+.course-switcher select {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #111827;
+  border-radius: 6px;
+  padding: 0.45rem;
+}
+
+.sidebar-state {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.module-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.module-block {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 0.6rem;
+}
+
+.module-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.45rem;
+}
+
+.lesson-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.lesson-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #1f2937;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.lesson-item:hover {
+  border-color: #93c5fd;
+  background-color: #eff6ff;
+}
+
+.lesson-item.active {
+  border-color: #3b82f6;
+  background-color: #dbeafe;
+  color: #1e3a8a;
 }
 
 .content-pane {
-  flex: 1;
-  padding: 2rem;
   overflow-y: auto;
-  border-right: 1px solid #ccc;
+  padding: 1.25rem;
   background-color: #fff;
-  color: #333;
+  color: #111827;
+  border-right: 1px solid #e5e7eb;
+}
+
+.lesson-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.lesson-header-row h2 {
+  margin: 0;
+}
+
+.lesson-nav-buttons {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.lesson-nav-btn {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #1f2937;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.82rem;
+}
+
+.lesson-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.content-loading {
+  color: #6b7280;
+}
+
+.content-error {
+  margin-bottom: 0.75rem;
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.5rem 0.6rem;
 }
 
 .editor-pane {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #1e1e1e;
+  background-color: #111827;
+  min-width: 0;
 }
 
 .controls {
-  padding: 1rem;
-  background-color: #2d2d2d;
+  padding: 0.75rem 1rem;
+  background-color: #1f2937;
   display: flex;
   justify-content: flex-end;
-  border-bottom: 1px solid #444;
+  border-top: 1px solid #374151;
+  border-bottom: 1px solid #374151;
+}
+
+.run-button {
+  background-color: #16a34a;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.run-button:hover {
+  background-color: #15803d;
+}
+
+.run-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .terminal {
   flex: 1;
-  background-color: #000;
-  color: #0f0;
-  font-family: 'Courier New', Courier, monospace;
+  background-color: #020617;
+  color: #e2e8f0;
+  font-family: 'Consolas', 'Courier New', monospace;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
 .terminal-header {
-  background-color: #333;
-  color: #ccc;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  border-bottom: 1px solid #444;
+  background-color: #0f172a;
+  color: #94a3b8;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  border-bottom: 1px solid #1e293b;
 }
 
 .terminal-body {
   flex: 1;
-  padding: 10px;
+  padding: 0.7rem;
   overflow-y: auto;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .terminal-body pre {
   margin: 0;
   white-space: pre-wrap;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .output {
-  color: #fff;
+  color: #e2e8f0;
 }
 
 .error {
-  color: #ff5555;
+  color: #fca5a5;
 }
 
 .success {
-  color: #55ff55;
-}
-
-.run-button {
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.run-button:hover {
-  background-color: #45a049;
+  color: #86efac;
 }

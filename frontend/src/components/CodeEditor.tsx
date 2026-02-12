@@ -1,7 +1,5 @@
-import React from 'react';
 import Editor, { loader } from '@monaco-editor/react';
 
-// Configure to use a faster CDN (npmmirror)
 loader.config({
   paths: {
     vs: 'https://registry.npmmirror.com/monaco-editor/0.44.0/files/min/vs',
@@ -9,17 +7,17 @@ loader.config({
 });
 
 interface CodeEditorProps {
-  initialCode?: string;
+  code?: string;
   onChange?: (value: string | undefined) => void;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ initialCode = '', onChange }) => {
+const CodeEditor = ({ code = '', onChange }: CodeEditorProps) => {
   return (
-    <div style={{ height: '60vh', border: '1px solid #ccc' }}>
+    <div style={{ height: '60vh', border: '1px solid #374151' }}>
       <Editor
         height="100%"
         defaultLanguage="java"
-        defaultValue={initialCode}
+        value={code}
         theme="vs-dark"
         onChange={onChange}
         options={{

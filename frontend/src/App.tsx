@@ -1,33 +1,119 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from './components/CodeEditor';
-import { executeCode } from './services/api';
-import type { ExecutionResult } from './services/api';
+import {
+  executeCode,
+  getCourseStructure,
+  getCourses,
+  getLessonDetail,
+} from './services/api';
+import type {
+  CourseStructure,
+  CourseSummary,
+  ExecutionResult,
+  LessonDetail,
+  LessonSummary,
+  ModuleStructure,
+} from './services/api';
 import './App.css';
 
-const dummyMarkdown = `
-# Java Basics: Hello World
-
-In this lesson, you will learn how to write your first Java program.
-
-## Task
-Print "Hello, World!" to the console.
-
-\`\`\`java
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}
-\`\`\`
-`;
-
-const initialJavaCode = `System.out.println("Hello, World!");`;
-
 function App() {
-  const [code, setCode] = useState(initialJavaCode);
+  const [courses, setCourses] = useState<CourseSummary[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
+  const [courseStructure, setCourseStructure] = useState<CourseStructure | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  const [lessonDetail, setLessonDetail] = useState<LessonDetail | null>(null);
+
+  const [code, setCode] = useState('System.out.println("Hello, World!");');
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+  const [isLoadingStructure, setIsLoadingStructure] = useState(false);
+  const [isLoadingLesson, setIsLoadingLesson] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    const loadCourses = async () => {
+      setIsLoadingCourses(true);
+      setLoadError(null);
+      try {
+        const data = await getCourses();
+        setCourses(data);
+        if (data.length > 0) {
+          setSelectedCourseId(data[0].id);
+        }
+      } catch {
+        setLoadError('课程列表加载失败，请确认 Course Service 已启动 (8082)。');
+      } finally {
+        setIsLoadingCourses(false);
+      }
+    };
+
+    loadCourses();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedCourseId) {
+      setCourseStructure(null);
+      return;
+    }
+
+    const loadStructure = async () => {
+      setIsLoadingStructure(true);
+      setLoadError(null);
+      try {
+        const data = await getCourseStructure(selectedCourseId);
+        setCourseStructure(data);
+
+        const firstLessonId = data.modules?.[0]?.lessons?.[0]?.id ?? null;
+        setSelectedLessonId(firstLessonId);
+      } catch {
+        setLoadError('课程结构加载失败，请检查后端接口 /api/courses/{id}/structure。');
+      } finally {
+        setIsLoadingStructure(false);
+      }
+    };
+
+    loadStructure();
+  }, [selectedCourseId]);
+
+  useEffect(() => {
+    if (!selectedLessonId) {
+      setLessonDetail(null);
+      return;
+    }
+
+    const loadLesson = async () => {
+      setIsLoadingLesson(true);
+      setLoadError(null);
+      try {
+        const data = await getLessonDetail(selectedLessonId);
+        setLessonDetail(data);
+        if (data.codeSnippet && data.codeSnippet.trim().length > 0) {
+          setCode(data.codeSnippet);
+        }
+      } catch {
+        setLoadError('课时详情加载失败，请检查后端接口 /api/courses/lessons/{lessonId}。');
+      } finally {
+        setIsLoadingLesson(false);
+      }
+    };
+
+    loadLesson();
+  }, [selectedLessonId]);
+
+  useEffect(() => {
+    if (!selectedLessonId) {
+      return;
+    }
+
+    const target = lessonRefs.current[selectedLessonId];
+    if (target) {
+      target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [selectedLessonId, courseStructure]);
 
   const handleRunCode = async () => {
     setIsRunning(true);
@@ -35,7 +121,7 @@ function App() {
     try {
       const data = await executeCode(code);
       setResult(data);
-    } catch (err) {
+    } catch {
       setResult({
         output: '',
         error: 'An unexpected error occurred',
@@ -47,26 +133,135 @@ function App() {
     }
   };
 
+  const sidebarModules: ModuleStructure[] = useMemo(
+    () => courseStructure?.modules ?? [],
+    [courseStructure],
+  );
+
+  const flatLessons = useMemo(() => {
+    const lessons: LessonSummary[] = [];
+    sidebarModules.forEach((module) => {
+      module.lessons.forEach((lesson) => lessons.push(lesson));
+    });
+    return lessons;
+  }, [sidebarModules]);
+
+  const currentLessonIndex = useMemo(() => {
+    if (!selectedLessonId) {
+      return -1;
+    }
+    return flatLessons.findIndex((lesson) => lesson.id === selectedLessonId);
+  }, [flatLessons, selectedLessonId]);
+
+  const previousLesson = currentLessonIndex > 0 ? flatLessons[currentLessonIndex - 1] : null;
+  const nextLesson =
+    currentLessonIndex >= 0 && currentLessonIndex < flatLessons.length - 1
+      ? flatLessons[currentLessonIndex + 1]
+      : null;
+
+  const renderSidebar = () => {
+    if (isLoadingCourses) {
+      return <div className="sidebar-state">加载课程中...</div>;
+    }
+
+    if (courses.length === 0) {
+      return <div className="sidebar-state">暂无课程，请先导入课程内容。</div>;
+    }
+
+    return (
+      <>
+        <div className="course-switcher">
+          <label htmlFor="course-select">课程</label>
+          <select
+            id="course-select"
+            value={selectedCourseId ?? ''}
+            onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+          >
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.title}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {isLoadingStructure ? (
+          <div className="sidebar-state">加载目录中...</div>
+        ) : (
+          <div className="module-list">
+            {sidebarModules.map((module) => (
+              <div key={module.id} className="module-block">
+                <div className="module-title">{module.title}</div>
+                <ul className="lesson-list">
+                  {module.lessons.map((lesson: LessonSummary) => (
+                    <li key={lesson.id}>
+                      <button
+                        type="button"
+                        ref={(el) => {
+                          lessonRefs.current[lesson.id] = el;
+                        }}
+                        className={`lesson-item ${selectedLessonId === lesson.id ? 'active' : ''}`}
+                        onClick={() => setSelectedLessonId(lesson.id)}
+                      >
+                        {lesson.title}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="app-container">
       <header className="app-header">
         <h1>Java Learning System</h1>
       </header>
       <main className="app-main">
-        <div className="content-pane">
-          <ReactMarkdown>{dummyMarkdown}</ReactMarkdown>
-        </div>
-        <div className="editor-pane">
-          <CodeEditor
-            initialCode={code}
-            onChange={(val) => setCode(val || '')}
-          />
+        <aside className="sidebar">{renderSidebar()}</aside>
+
+        <section className="content-pane">
+          {loadError && <div className="content-error">{loadError}</div>}
+          {isLoadingLesson ? (
+            <div className="content-loading">加载课时内容中...</div>
+          ) : lessonDetail ? (
+            <>
+              <div className="lesson-header-row">
+                <h2>{lessonDetail.title}</h2>
+                <div className="lesson-nav-buttons">
+                  <button
+                    type="button"
+                    className="lesson-nav-btn"
+                    onClick={() => previousLesson && setSelectedLessonId(previousLesson.id)}
+                    disabled={!previousLesson}
+                  >
+                    上一课
+                  </button>
+                  <button
+                    type="button"
+                    className="lesson-nav-btn"
+                    onClick={() => nextLesson && setSelectedLessonId(nextLesson.id)}
+                    disabled={!nextLesson}
+                  >
+                    下一课
+                  </button>
+                </div>
+              </div>
+              <ReactMarkdown>{lessonDetail.content || '暂无内容'}</ReactMarkdown>
+            </>
+          ) : (
+            <div className="content-loading">请选择左侧课时开始学习</div>
+          )}
+        </section>
+
+        <section className="editor-pane">
+          <CodeEditor code={code} onChange={(val) => setCode(val || '')} />
           <div className="controls">
-            <button
-              className="run-button"
-              onClick={handleRunCode}
-              disabled={isRunning}
-            >
+            <button className="run-button" onClick={handleRunCode} disabled={isRunning}>
               {isRunning ? 'Running...' : 'Run Code'}
             </button>
           </div>
@@ -84,7 +279,7 @@ function App() {
               )}
             </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
