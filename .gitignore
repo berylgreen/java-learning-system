@@ -1,0 +1,38 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Build outputs
+**/target/
+**/dist/
+**/build/
+
+# Node
+**/node_modules/
+**/.npm/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env files
+.env
+.env.*
+
+# OMC / Claude local artifacts
+.omc/
+.claude/
+
+# Test reports / dumps
+**/surefire-reports/
+*.dumpstream
+
+# Local docs scratch
+docs/ai_plans/
