@@ -5,6 +5,7 @@
 **Goal:** Build a modern Java learning system featuring an interactive code sandbox, structured course content, and intelligent import tools.
 
 **Architecture:**
+
 - **Frontend:** React + TypeScript + Monaco Editor + Markdown Viewer.
 - **Backend:** Spring Boot 3 (Course/User/Sandbox Services).
 - **Sandbox:** JShell + Security Manager (No Docker), in-process execution.
@@ -19,6 +20,7 @@
 ### Task 1: Project Skeleton & Sandbox Service Setup
 
 **Files:**
+
 - Create: `backend/sandbox-service/pom.xml`
 - Create: `backend/sandbox-service/src/main/java/com/jls/sandbox/SandboxApplication.java`
 - Create: `backend/sandbox-service/src/main/resources/application.yml`
@@ -28,6 +30,7 @@
 Create a multi-module Maven project or independent services. Let's start with a standalone `sandbox-service` for simplicity in Phase 1.
 
 **pom.xml dependencies:**
+
 - `spring-boot-starter-web`
 - `spring-boot-starter-validation`
 - `lombok`
@@ -47,6 +50,7 @@ Run `mvn clean install` and start the app. Curl `/health`.
 ### Task 2: JShell Execution Engine
 
 **Files:**
+
 - Create: `backend/sandbox-service/src/main/java/com/jls/sandbox/service/JShellService.java`
 - Create: `backend/sandbox-service/src/test/java/com/jls/sandbox/service/JShellServiceTest.java`
 
@@ -80,6 +84,7 @@ void testExecuteSimpleMath() {
 ### Task 3: Security & Timeout (The Guard)
 
 **Files:**
+
 - Modify: `backend/sandbox-service/src/main/java/com/jls/sandbox/service/JShellService.java`
 - Create: `backend/sandbox-service/src/main/java/com/jls/sandbox/security/SecurityPolicy.java` (Concept)
 
@@ -104,6 +109,7 @@ void testExecuteSimpleMath() {
 ### Task 4: Data Model & Course Service
 
 **Files:**
+
 - Create: `backend/course-service/pom.xml`
 - Create: `backend/course-service/src/main/java/com/jls/course/model/Course.java`
 - Create: `backend/course-service/src/main/java/com/jls/course/repository/CourseRepository.java`
@@ -123,6 +129,7 @@ void testExecuteSimpleMath() {
 ### Task 5: Import Engine (The Converter)
 
 **Files:**
+
 - Create: `backend/course-service/src/main/java/com/jls/course/service/ImportService.java`
 
 **Step 1: Text Parser**
@@ -141,6 +148,7 @@ void testExecuteSimpleMath() {
 ### Task 6: React Setup & Monaco Editor
 
 **Files:**
+
 - Create: `frontend/package.json`
 - Create: `frontend/src/components/CodeEditor.tsx`
 
@@ -160,6 +168,7 @@ void testExecuteSimpleMath() {
 ### Task 7: Sandbox Integration
 
 **Files:**
+
 - Create: `frontend/src/services/api.ts`
 - Modify: `frontend/src/App.tsx`
 
@@ -170,6 +179,6 @@ void testExecuteSimpleMath() {
 **Step 2: UI Integration**
 
 - Split pane layout: Left (Markdown Content), Right (Code Editor + Output Console).
-- "Run" button triggers API and displays stdout in Console.
+- "Run" button triggers API and displays s	tdout in Console.
 
 ---
