@@ -49,4 +49,10 @@ public class CourseController {
         Course course = importService.importCourse(markdown);
         return ResponseEntity.ok(course);
     }
+
+    @PostMapping("/import/source-index")
+    public ResponseEntity<Course> importCourseFromSourceIndex(@RequestBody String sourceIndexJson) {
+        Course course = importService.importCourseFromSourceIndexJson(sourceIndexJson);
+        return ResponseEntity.ok(course);
+    }
 }

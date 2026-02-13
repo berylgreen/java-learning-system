@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,7 +48,7 @@ class ImportServiceTest {
         assertNotNull(course.getId());
         assertEquals("Java Basics", course.getTitle());
 
-        List<com.jls.course.model.Module> modules = moduleRepository.findByCourse(course);
+        List<Module> modules = moduleRepository.findByCourse(course);
         assertEquals(1, modules.size());
         assertEquals("Introduction", modules.get(0).getTitle());
 
@@ -55,5 +57,25 @@ class ImportServiceTest {
         assertEquals("Hello World", lessons.get(0).getTitle());
         assertTrue(lessons.get(0).getContent().contains("Welcome to Java."));
         assertEquals("System.out.println(\"Hello\");", lessons.get(0).getCodeSnippet().trim());
+    }
+
+    @Test
+    void testImportCourseFromSourceIndexJson() throws Exception {
+        String sourceIndexJson = Files.readString(Paths.get("..", "..", "docs", "courses", "course-java-basics-source-index.json"));
+
+        Course course = importService.importCourseFromSourceIndexJson(sourceIndexJson);
+
+        assertNotNull(course.getId());
+        assertEquals("Java 程序设计基础与实战", course.getTitle());
+
+        List<Module> modules = moduleRepository.findByCourse(course);
+        assertEquals(12, modules.size());
+        assertEquals("Chapter01", modules.get(0).getTitle());
+
+        List<Lesson> chapterOneLessons = lessonRepository.findByModule(modules.get(0));
+        assertEquals(1, chapterOneLessons.size());
+        assertEquals("HelloWorld", chapterOneLessons.get(0).getTitle());
+        assertNotNull(chapterOneLessons.get(0).getCodeSnippet());
+        assertFalse(chapterOneLessons.get(0).getCodeSnippet().isBlank());
     }
 }
