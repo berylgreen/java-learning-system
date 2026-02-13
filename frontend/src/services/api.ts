@@ -80,3 +80,18 @@ export const getLessonDetail = async (lessonId: number): Promise<LessonDetail> =
   const response = await axios.get<LessonDetail>(`${COURSE_API_BASE_URL}/lessons/${lessonId}`);
   return response.data;
 };
+
+export const importCourseFromSourceIndex = async (
+  sourceIndexJson: string,
+): Promise<CourseSummary> => {
+  const response = await axios.post<CourseSummary>(
+    `${COURSE_API_BASE_URL}/import/source-index`,
+    sourceIndexJson,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    },
+  );
+  return response.data;
+};

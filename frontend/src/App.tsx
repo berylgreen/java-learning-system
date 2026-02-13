@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from './components/CodeEditor';
 import {
@@ -6,6 +7,7 @@ import {
   getCourseStructure,
   getCourses,
   getLessonDetail,
+  importCourseFromSourceIndex,
 } from './services/api';
 import type {
   CourseStructure,
@@ -32,26 +34,102 @@ function App() {
   const [isLoadingStructure, setIsLoadingStructure] = useState(false);
   const [isLoadingLesson, setIsLoadingLesson] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [sourceIndexJson, setSourceIndexJson] = useState('');
+  const [isImportingSourceIndex, setIsImportingSourceIndex] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState<string | null>(null);
+
   const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
-  useEffect(() => {
-    const loadCourses = async () => {
-      setIsLoadingCourses(true);
-      setLoadError(null);
-      try {
-        const data = await getCourses();
-        setCourses(data);
-        if (data.length > 0) {
-          setSelectedCourseId(data[0].id);
-        }
-      } catch {
-        setLoadError('课程列表加载失败，请确认 Course Service 已启动 (8082)。');
-      } finally {
-        setIsLoadingCourses(false);
-      }
-    };
+  const loadCourses = async (
+    options: { selectCourseId?: number; fallbackToFirst?: boolean } = { fallbackToFirst: true },
+  ): Promise<boolean> => {
+    setIsLoadingCourses(true);
+    setLoadError(null);
+    try {
+      const data = await getCourses();
+      setCourses(data);
 
-    loadCourses();
+      if (data.length === 0) {
+        setSelectedCourseId(null);
+        setCourseStructure(null);
+        setSelectedLessonId(null);
+        setLessonDetail(null);
+        return true;
+      }
+
+      if (options.selectCourseId && data.some((course) => course.id === options.selectCourseId)) {
+        setSelectedCourseId(options.selectCourseId);
+        return true;
+      }
+
+      if (options.fallbackToFirst) {
+        setSelectedCourseId((currentId) =>
+          currentId && data.some((course) => course.id === currentId) ? currentId : data[0].id,
+        );
+      }
+
+      return true;
+    } catch {
+      setLoadError('课程列表加载失败，请确认 Course Service 已启动 (8082)。');
+      return false;
+    } finally {
+      setIsLoadingCourses(false);
+    }
+  };
+
+  const handleSourceIndexFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) {
+      return;
+    }
+
+    const maxFileSize = 512 * 1024;
+    if (file.size > maxFileSize) {
+      setImportSuccess(null);
+      setImportError('JSON 文件过大，请控制在 512KB 以内。');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      setSourceIndexJson(text);
+      setImportError(null);
+      setImportSuccess(`已加载文件：${file.name}`);
+    } catch {
+      setImportSuccess(null);
+      setImportError('读取文件失败，请重试。');
+    }
+  };
+
+  const handleImportSourceIndex = async () => {
+    if (!sourceIndexJson.trim()) {
+      setImportSuccess(null);
+      setImportError('请先粘贴或上传源码索引 JSON。');
+      return;
+    }
+
+    setIsImportingSourceIndex(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const importedCourse = await importCourseFromSourceIndex(sourceIndexJson);
+      const loadSuccess = await loadCourses({ selectCourseId: importedCourse.id, fallbackToFirst: true });
+      if (loadSuccess) {
+        setImportSuccess(`导入成功：${importedCourse.title}`);
+      }
+    } catch {
+      setImportError('导入失败，请检查 JSON 格式或后端日志。');
+    } finally {
+      setIsImportingSourceIndex(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadCourses({ fallbackToFirst: true });
   }, []);
 
   useEffect(() => {
@@ -76,7 +154,7 @@ function App() {
       }
     };
 
-    loadStructure();
+    void loadStructure();
   }, [selectedCourseId]);
 
   useEffect(() => {
@@ -101,7 +179,7 @@ function App() {
       }
     };
 
-    loadLesson();
+    void loadLesson();
   }, [selectedLessonId]);
 
   useEffect(() => {
@@ -160,57 +238,92 @@ function App() {
       : null;
 
   const renderSidebar = () => {
-    if (isLoadingCourses) {
-      return <div className="sidebar-state">加载课程中...</div>;
-    }
-
-    if (courses.length === 0) {
-      return <div className="sidebar-state">暂无课程，请先导入课程内容。</div>;
-    }
-
     return (
       <>
-        <div className="course-switcher">
-          <label htmlFor="course-select">课程</label>
-          <select
-            id="course-select"
-            value={selectedCourseId ?? ''}
-            onChange={(e) => setSelectedCourseId(Number(e.target.value))}
-          >
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
+        <div className="source-index-import">
+          <div className="source-index-title">源码索引导入</div>
+          <textarea
+            value={sourceIndexJson}
+            onChange={(e) => {
+              setSourceIndexJson(e.target.value);
+              setImportError(null);
+              setImportSuccess(null);
+            }}
+            placeholder="粘贴 course-java-basics-source-index.json 内容"
+            rows={6}
+          />
+          <div className="source-index-actions">
+            <label className="upload-file-btn" htmlFor="source-index-file">
+              上传 JSON
+            </label>
+            <input
+              id="source-index-file"
+              type="file"
+              accept="application/json,.json"
+              onChange={handleSourceIndexFileChange}
+            />
+            <button
+              type="button"
+              className="import-source-btn"
+              onClick={handleImportSourceIndex}
+              disabled={isImportingSourceIndex || !sourceIndexJson.trim()}
+            >
+              {isImportingSourceIndex ? '导入中...' : '导入课程'}
+            </button>
+          </div>
+          {importError && <div className="import-error">{importError}</div>}
+          {importSuccess && <div className="import-success">{importSuccess}</div>}
         </div>
 
-        {isLoadingStructure ? (
-          <div className="sidebar-state">加载目录中...</div>
+        {isLoadingCourses ? (
+          <div className="sidebar-state">加载课程中...</div>
+        ) : courses.length === 0 ? (
+          <div className="sidebar-state">暂无课程，请先导入课程内容。</div>
         ) : (
-          <div className="module-list">
-            {sidebarModules.map((module) => (
-              <div key={module.id} className="module-block">
-                <div className="module-title">{module.title}</div>
-                <ul className="lesson-list">
-                  {module.lessons.map((lesson: LessonSummary) => (
-                    <li key={lesson.id}>
-                      <button
-                        type="button"
-                        ref={(el) => {
-                          lessonRefs.current[lesson.id] = el;
-                        }}
-                        className={`lesson-item ${selectedLessonId === lesson.id ? 'active' : ''}`}
-                        onClick={() => setSelectedLessonId(lesson.id)}
-                      >
-                        {lesson.title}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+          <>
+            <div className="course-switcher">
+              <label htmlFor="course-select">课程</label>
+              <select
+                id="course-select"
+                value={selectedCourseId ?? ''}
+                onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+              >
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {isLoadingStructure ? (
+              <div className="sidebar-state">加载目录中...</div>
+            ) : (
+              <div className="module-list">
+                {sidebarModules.map((module) => (
+                  <div key={module.id} className="module-block">
+                    <div className="module-title">{module.title}</div>
+                    <ul className="lesson-list">
+                      {module.lessons.map((lesson: LessonSummary) => (
+                        <li key={lesson.id}>
+                          <button
+                            type="button"
+                            ref={(el) => {
+                              lessonRefs.current[lesson.id] = el;
+                            }}
+                            className={`lesson-item ${selectedLessonId === lesson.id ? 'active' : ''}`}
+                            onClick={() => setSelectedLessonId(lesson.id)}
+                          >
+                            {lesson.title}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </>
     );

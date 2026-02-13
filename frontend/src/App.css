@@ -39,6 +39,99 @@
   padding: 0.9rem;
 }
 
+.source-index-import {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.7rem;
+  margin-bottom: 0.9rem;
+}
+
+.source-index-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.45rem;
+}
+
+.source-index-import textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.45rem;
+  font-size: 0.82rem;
+  font-family: 'Consolas', 'Courier New', monospace;
+  min-height: 110px;
+  color: #111827;
+  background: #ffffff;
+}
+
+.source-index-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.source-index-actions input[type='file'] {
+  display: none;
+}
+
+.upload-file-btn,
+.import-source-btn {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.upload-file-btn:hover,
+.import-source-btn:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.import-source-btn {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.import-source-btn:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.import-source-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.import-error {
+  margin-top: 0.45rem;
+  border: 1px solid #fecaca;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.78rem;
+}
+
+.import-success {
+  margin-top: 0.45rem;
+  border: 1px solid #bbf7d0;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 6px;
+  padding: 0.35rem 0.45rem;
+  font-size: 0.78rem;
+}
+
 .course-switcher {
   display: flex;
   flex-direction: column;
