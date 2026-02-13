@@ -36,3 +36,8 @@ yarn-error.log*
 
 # Local docs scratch
 docs/ai_plans/
+
+# H2 database files
+**/data/*.db
+**/data/*.lock.db
+**/data/*.trace.db
