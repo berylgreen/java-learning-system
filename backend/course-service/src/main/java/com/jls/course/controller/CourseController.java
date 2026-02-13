@@ -1,10 +1,14 @@
 package com.jls.course.controller;
 
 import com.jls.course.dto.CourseStructureDTO;
+import com.jls.course.dto.ExerciseDTO;
+import com.jls.course.dto.ExerciseSubmissionRequestDTO;
+import com.jls.course.dto.ExerciseSubmissionResultDTO;
 import com.jls.course.dto.LessonDetailDTO;
 import com.jls.course.model.Course;
 import com.jls.course.repository.CourseRepository;
 import com.jls.course.service.CourseService;
+import com.jls.course.service.ExerciseService;
 import com.jls.course.service.ImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +25,7 @@ public class CourseController {
     private final CourseRepository courseRepository;
     private final ImportService importService;
     private final CourseService courseService;
+    private final ExerciseService exerciseService;
 
     @GetMapping
     public List<Course> getAllCourses() {
@@ -42,6 +47,24 @@ public class CourseController {
     @GetMapping("/lessons/{lessonId}")
     public ResponseEntity<LessonDetailDTO> getLessonDetail(@PathVariable Long lessonId) {
         return ResponseEntity.ok(courseService.getLessonDetail(lessonId));
+    }
+
+    @GetMapping("/lessons/{lessonId}/exercise")
+    public ResponseEntity<ExerciseDTO> getExerciseByLessonId(@PathVariable Long lessonId) {
+        return ResponseEntity.ok(exerciseService.getExerciseByLessonId(lessonId));
+    }
+
+    @PostMapping("/lessons/{lessonId}/exercise/submissions")
+    public ResponseEntity<ExerciseSubmissionResultDTO> submitExercise(
+            @PathVariable Long lessonId,
+            @RequestBody ExerciseSubmissionRequestDTO request
+    ) {
+        return ResponseEntity.ok(exerciseService.submitAndJudge(lessonId, request));
+    }
+
+    @GetMapping("/lessons/{lessonId}/exercise/submissions/latest")
+    public ResponseEntity<ExerciseSubmissionResultDTO> getLatestExerciseSubmission(@PathVariable Long lessonId) {
+        return ResponseEntity.ok(exerciseService.getLatestSubmission(lessonId));
     }
 
     @PostMapping("/import")

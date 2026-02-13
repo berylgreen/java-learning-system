@@ -7,14 +7,19 @@ import {
   executeCode,
   getCourseStructure,
   getCourses,
+  getLatestLessonExerciseSubmission,
   getLessonDetail,
+  getLessonExercise,
   importCourseFromMarkdown,
   importCourseFromSourceIndex,
+  submitLessonExercise,
 } from './services/api';
 import type {
   CourseStructure,
   CourseSummary,
   ExecutionResult,
+  Exercise,
+  ExerciseSubmissionResult,
   LessonDetail,
   LessonSummary,
   ModuleStructure,
@@ -45,6 +50,12 @@ function App() {
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isDeletingCourse, setIsDeletingCourse] = useState(false);
+
+  const [exercise, setExercise] = useState<Exercise | null>(null);
+  const [exerciseResult, setExerciseResult] = useState<ExerciseSubmissionResult | null>(null);
+  const [isLoadingExercise, setIsLoadingExercise] = useState(false);
+  const [isSubmittingExercise, setIsSubmittingExercise] = useState(false);
+  const [exerciseError, setExerciseError] = useState<string | null>(null);
 
   const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
@@ -261,6 +272,39 @@ function App() {
 
   useEffect(() => {
     if (!selectedLessonId) {
+      setExercise(null);
+      setExerciseResult(null);
+      setExerciseError(null);
+      return;
+    }
+
+    const loadExercise = async () => {
+      setIsLoadingExercise(true);
+      setExerciseError(null);
+      try {
+        const exerciseData = await getLessonExercise(selectedLessonId);
+        setExercise(exerciseData);
+
+        try {
+          const latest = await getLatestLessonExerciseSubmission(selectedLessonId);
+          setExerciseResult(latest);
+        } catch {
+          setExerciseResult(null);
+        }
+      } catch {
+        setExercise(null);
+        setExerciseResult(null);
+        setExerciseError('本课暂未配置练习。');
+      } finally {
+        setIsLoadingExercise(false);
+      }
+    };
+
+    void loadExercise();
+  }, [selectedLessonId]);
+
+  useEffect(() => {
+    if (!selectedLessonId) {
       return;
     }
 
@@ -285,6 +329,30 @@ function App() {
       });
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const handleUseStarterCode = () => {
+    if (!exercise?.starterCode?.trim()) {
+      return;
+    }
+    setCode(exercise.starterCode);
+  };
+
+  const handleSubmitExercise = async () => {
+    if (!selectedLessonId) {
+      return;
+    }
+
+    setIsSubmittingExercise(true);
+    setExerciseError(null);
+    try {
+      const submission = await submitLessonExercise(selectedLessonId, code);
+      setExerciseResult(submission);
+    } catch {
+      setExerciseError('判题失败，请检查代码或后端日志。');
+    } finally {
+      setIsSubmittingExercise(false);
     }
   };
 
@@ -540,6 +608,86 @@ function App() {
                 </div>
               </div>
               <ReactMarkdown>{lessonDetail.content || '暂无内容'}</ReactMarkdown>
+
+              <div className="exercise-panel">
+                <div className="exercise-header">
+                  <h3>课后练习</h3>
+                  <div className="exercise-actions">
+                    <button
+                      type="button"
+                      className="exercise-btn secondary"
+                      onClick={handleUseStarterCode}
+                      disabled={!exercise?.starterCode}
+                    >
+                      使用模板代码
+                    </button>
+                    <button
+                      type="button"
+                      className="exercise-btn primary"
+                      onClick={handleSubmitExercise}
+                      disabled={isSubmittingExercise || !exercise}
+                    >
+                      {isSubmittingExercise ? '判题中...' : '运行并判题'}
+                    </button>
+                  </div>
+                </div>
+
+                {isLoadingExercise ? (
+                  <div className="exercise-loading">练习加载中...</div>
+                ) : exercise ? (
+                  <>
+                    <div className="exercise-title">{exercise.title}</div>
+                    {exercise.description && (
+                      <div className="exercise-description">
+                        <ReactMarkdown>{exercise.description}</ReactMarkdown>
+                      </div>
+                    )}
+                    {exercise.publicTestCases?.length > 0 && (
+                      <div className="exercise-public-cases">
+                        <div className="exercise-subtitle">公开用例（{exercise.publicTestCases.length}）</div>
+                        <ul>
+                          {exercise.publicTestCases.map((testCase, index) => (
+                            <li key={`${index}-${testCase.input}`}>
+                              输入：{testCase.input || '(空)'} → 期望输出：{testCase.expectedOutput}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="exercise-empty">本课暂未配置练习。</div>
+                )}
+
+                {exerciseError && <div className="exercise-error">{exerciseError}</div>}
+
+                {exerciseResult && (
+                  <div className="exercise-result">
+                    <div className={`exercise-status ${exerciseResult.status === 'PASS' ? 'pass' : 'fail'}`}>
+                      {exerciseResult.status === 'PASS' ? '通过' : '未通过'} · 得分 {exerciseResult.score}
+                    </div>
+                    <div className="exercise-message">{exerciseResult.message}</div>
+                    <div className="exercise-hidden-summary">
+                      隐藏用例：{exerciseResult.hiddenSummary.passed}/{exerciseResult.hiddenSummary.total}
+                    </div>
+
+                    {exerciseResult.publicResults?.length > 0 && (
+                      <div className="exercise-public-results">
+                        <div className="exercise-subtitle">公开用例结果</div>
+                        <ul>
+                          {exerciseResult.publicResults.map((item, index) => (
+                            <li key={`${index}-${item.input}`} className={item.passed ? 'pass' : 'fail'}>
+                              [{item.passed ? '通过' : '失败'}] 输入：{item.input || '(空)'}，期望：
+                              {item.expectedOutput}，实际：{item.actualOutput || '(空)'}
+                              {item.error ? `，错误：${item.error}` : ''}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </>
           ) : (
             <div className="content-loading">请选择左侧课时开始学习</div>
