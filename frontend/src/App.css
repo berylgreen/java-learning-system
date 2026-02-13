@@ -47,29 +47,7 @@
   margin-bottom: 0.9rem;
 }
 
-.course-switcher-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
 
-.open-import-dialog-btn {
-  border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #ffffff;
-  border-radius: 6px;
-  padding: 0.28rem 0.52rem;
-  font-size: 0.78rem;
-  line-height: 1;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.open-import-dialog-btn:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-}
 
 .import-dialog-mask {
   position: fixed;
@@ -222,6 +200,72 @@
   color: #111827;
   border-radius: 6px;
   padding: 0.45rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.course-select-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.delete-course-btn {
+  display: none;
+  /* Deprecated */
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.import-btn {
+  color: #2563eb;
+}
+
+.import-btn:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.delete-btn {
+  color: #ef4444;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.text-btn {
+  border: none;
+  background: none;
+  color: #2563eb;
+  padding: 0 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.text-btn:hover {
+  color: #1d4ed8;
 }
 
 .sidebar-state {

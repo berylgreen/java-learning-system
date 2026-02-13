@@ -104,3 +104,7 @@ export const importCourseFromSourceIndex = async (
   );
   return response.data;
 };
+
+export const deleteCourse = async (courseId: number): Promise<void> => {
+  await axios.delete(`${COURSE_API_BASE_URL}/${courseId}`);
+};

@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react';
 import ReactMarkdown from 'react-markdown';
 import CodeEditor from './components/CodeEditor';
 import {
+  deleteCourse,
   executeCode,
   getCourseStructure,
   getCourses,
@@ -43,6 +44,7 @@ function App() {
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isDeletingCourse, setIsDeletingCourse] = useState(false);
 
   const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
@@ -181,6 +183,28 @@ function App() {
     }
   };
 
+  // 删除当前选中的课程
+  const handleDeleteCourse = async () => {
+    if (!selectedCourseId) return;
+    const course = courses.find((c) => c.id === selectedCourseId);
+    if (!course) return;
+    if (!window.confirm(`确认删除课程「${course.title}」？此操作不可恢复。`)) return;
+
+    setIsDeletingCourse(true);
+    try {
+      await deleteCourse(selectedCourseId);
+      setSelectedCourseId(null);
+      setCourseStructure(null);
+      setSelectedLessonId(null);
+      setLessonDetail(null);
+      await loadCourses({ fallbackToFirst: true });
+    } catch {
+      setLoadError('删除课程失败，请检查后端日志。');
+    } finally {
+      setIsDeletingCourse(false);
+    }
+  };
+
   useEffect(() => {
     void loadCourses({ fallbackToFirst: true });
   }, []);
@@ -294,37 +318,71 @@ function App() {
     return (
       <>
         <div className="course-switcher">
-          <div className="course-switcher-header">
-            <label htmlFor="course-select">课程</label>
-            <button
-              type="button"
-              className="open-import-dialog-btn"
-              onClick={() => {
-                setIsImportDialogOpen(true);
-                setImportError(null);
-                setImportSuccess(null);
-              }}
-            >
-              导入
-            </button>
-          </div>
 
           {isLoadingCourses ? (
             <div className="sidebar-state">加载课程中...</div>
           ) : courses.length === 0 ? (
-            <div className="sidebar-state">暂无课程，请先导入课程内容。</div>
+            <div className="sidebar-state">
+              暂无课程，请先
+              <button
+                type="button"
+                className="text-btn"
+                onClick={() => {
+                  setIsImportDialogOpen(true);
+                  setImportError(null);
+                  setImportSuccess(null);
+                }}
+              >
+                导入课程
+              </button>
+            </div>
           ) : (
-            <select
-              id="course-select"
-              value={selectedCourseId ?? ''}
-              onChange={(e) => setSelectedCourseId(Number(e.target.value))}
-            >
-              {courses.map((course) => (
-                <option key={course.id} value={course.id}>
-                  {course.title}
-                </option>
-              ))}
-            </select>
+            <div className="course-select-row">
+              <label htmlFor="course-select">课程</label>
+              <select
+                id="course-select"
+                value={selectedCourseId ?? ''}
+                onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+              >
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                className="icon-btn import-btn"
+                onClick={() => {
+                  setIsImportDialogOpen(true);
+                  setImportError(null);
+                  setImportSuccess(null);
+                }}
+                disabled={isImportingSourceIndex || isImportingMarkdown}
+                title="导入课程"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </button>
+
+              <button
+                type="button"
+                className="icon-btn delete-btn"
+                onClick={handleDeleteCourse}
+                disabled={isDeletingCourse || !selectedCourseId}
+                title="删除当前课程"
+              >
+                {isDeletingCourse ? (
+                  <span className="spinner-sm"></span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                )}
+              </button>
+            </div>
           )}
         </div>
 

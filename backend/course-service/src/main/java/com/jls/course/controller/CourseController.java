@@ -55,4 +55,10 @@ public class CourseController {
         Course course = importService.importCourseFromSourceIndexJson(sourceIndexJson);
         return ResponseEntity.ok(course);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
+        courseService.deleteCourse(id);
+        return ResponseEntity.noContent().build();
+    }
 }

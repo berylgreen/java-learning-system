@@ -69,4 +69,22 @@ public class CourseService {
                 .codeSnippet(lesson.getCodeSnippet())
                 .build();
     }
+
+    /**
+     * 删除课程及其关联的所有模块和课时（级联删除）
+     */
+    @Transactional
+    public void deleteCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
+
+        // 级联删除：Lesson → Module → Course
+        List<Module> modules = moduleRepository.findByCourse(course);
+        for (Module module : modules) {
+            List<Lesson> lessons = lessonRepository.findByModule(module);
+            lessonRepository.deleteAll(lessons);
+        }
+        moduleRepository.deleteAll(modules);
+        courseRepository.delete(course);
+    }
 }
