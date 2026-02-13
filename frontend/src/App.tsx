@@ -7,6 +7,7 @@ import {
   getCourseStructure,
   getCourses,
   getLessonDetail,
+  importCourseFromMarkdown,
   importCourseFromSourceIndex,
 } from './services/api';
 import type {
@@ -36,9 +37,12 @@ function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [sourceIndexJson, setSourceIndexJson] = useState('');
+  const [markdownContent, setMarkdownContent] = useState('');
   const [isImportingSourceIndex, setIsImportingSourceIndex] = useState(false);
+  const [isImportingMarkdown, setIsImportingMarkdown] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
@@ -119,12 +123,61 @@ function App() {
       const importedCourse = await importCourseFromSourceIndex(sourceIndexJson);
       const loadSuccess = await loadCourses({ selectCourseId: importedCourse.id, fallbackToFirst: true });
       if (loadSuccess) {
-        setImportSuccess(`导入成功：${importedCourse.title}`);
+        setImportSuccess(`源码索引导入成功：${importedCourse.title}`);
       }
     } catch {
-      setImportError('导入失败，请检查 JSON 格式或后端日志。');
+      setImportError('源码索引导入失败，请检查 JSON 格式或后端日志。');
     } finally {
       setIsImportingSourceIndex(false);
+    }
+  };
+
+  const handleMarkdownFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) {
+      return;
+    }
+
+    const maxFileSize = 1024 * 1024;
+    if (file.size > maxFileSize) {
+      setImportSuccess(null);
+      setImportError('Markdown 文件过大，请控制在 1MB 以内。');
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      setMarkdownContent(text);
+      setImportError(null);
+      setImportSuccess(`已加载文件：${file.name}`);
+    } catch {
+      setImportSuccess(null);
+      setImportError('读取 Markdown 文件失败，请重试。');
+    }
+  };
+
+  const handleImportMarkdown = async () => {
+    if (!markdownContent.trim()) {
+      setImportSuccess(null);
+      setImportError('请先粘贴或上传 Markdown 内容。');
+      return;
+    }
+
+    setIsImportingMarkdown(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const importedCourse = await importCourseFromMarkdown(markdownContent);
+      const loadSuccess = await loadCourses({ selectCourseId: importedCourse.id, fallbackToFirst: true });
+      if (loadSuccess) {
+        setImportSuccess(`Markdown 导入成功：${importedCourse.title}`);
+      }
+    } catch {
+      setImportError('Markdown 导入失败，请检查内容格式或后端日志。');
+    } finally {
+      setIsImportingMarkdown(false);
     }
   };
 
@@ -240,91 +293,69 @@ function App() {
   const renderSidebar = () => {
     return (
       <>
-        <div className="source-index-import">
-          <div className="source-index-title">源码索引导入</div>
-          <textarea
-            value={sourceIndexJson}
-            onChange={(e) => {
-              setSourceIndexJson(e.target.value);
-              setImportError(null);
-              setImportSuccess(null);
-            }}
-            placeholder="粘贴 course-java-basics-source-index.json 内容"
-            rows={6}
-          />
-          <div className="source-index-actions">
-            <label className="upload-file-btn" htmlFor="source-index-file">
-              上传 JSON
-            </label>
-            <input
-              id="source-index-file"
-              type="file"
-              accept="application/json,.json"
-              onChange={handleSourceIndexFileChange}
-            />
+        <div className="course-switcher">
+          <div className="course-switcher-header">
+            <label htmlFor="course-select">课程</label>
             <button
               type="button"
-              className="import-source-btn"
-              onClick={handleImportSourceIndex}
-              disabled={isImportingSourceIndex || !sourceIndexJson.trim()}
+              className="open-import-dialog-btn"
+              onClick={() => {
+                setIsImportDialogOpen(true);
+                setImportError(null);
+                setImportSuccess(null);
+              }}
             >
-              {isImportingSourceIndex ? '导入中...' : '导入课程'}
+              导入
             </button>
           </div>
-          {importError && <div className="import-error">{importError}</div>}
-          {importSuccess && <div className="import-success">{importSuccess}</div>}
+
+          {isLoadingCourses ? (
+            <div className="sidebar-state">加载课程中...</div>
+          ) : courses.length === 0 ? (
+            <div className="sidebar-state">暂无课程，请先导入课程内容。</div>
+          ) : (
+            <select
+              id="course-select"
+              value={selectedCourseId ?? ''}
+              onChange={(e) => setSelectedCourseId(Number(e.target.value))}
+            >
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
 
-        {isLoadingCourses ? (
-          <div className="sidebar-state">加载课程中...</div>
-        ) : courses.length === 0 ? (
-          <div className="sidebar-state">暂无课程，请先导入课程内容。</div>
-        ) : (
-          <>
-            <div className="course-switcher">
-              <label htmlFor="course-select">课程</label>
-              <select
-                id="course-select"
-                value={selectedCourseId ?? ''}
-                onChange={(e) => setSelectedCourseId(Number(e.target.value))}
-              >
-                {courses.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
+        {!isLoadingCourses && courses.length > 0 &&
+          (isLoadingStructure ? (
+            <div className="sidebar-state">加载目录中...</div>
+          ) : (
+            <div className="module-list">
+              {sidebarModules.map((module) => (
+                <div key={module.id} className="module-block">
+                  <div className="module-title">{module.title}</div>
+                  <ul className="lesson-list">
+                    {module.lessons.map((lesson: LessonSummary) => (
+                      <li key={lesson.id}>
+                        <button
+                          type="button"
+                          ref={(el) => {
+                            lessonRefs.current[lesson.id] = el;
+                          }}
+                          className={`lesson-item ${selectedLessonId === lesson.id ? 'active' : ''}`}
+                          onClick={() => setSelectedLessonId(lesson.id)}
+                        >
+                          {lesson.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
-
-            {isLoadingStructure ? (
-              <div className="sidebar-state">加载目录中...</div>
-            ) : (
-              <div className="module-list">
-                {sidebarModules.map((module) => (
-                  <div key={module.id} className="module-block">
-                    <div className="module-title">{module.title}</div>
-                    <ul className="lesson-list">
-                      {module.lessons.map((lesson: LessonSummary) => (
-                        <li key={lesson.id}>
-                          <button
-                            type="button"
-                            ref={(el) => {
-                              lessonRefs.current[lesson.id] = el;
-                            }}
-                            className={`lesson-item ${selectedLessonId === lesson.id ? 'active' : ''}`}
-                            onClick={() => setSelectedLessonId(lesson.id)}
-                          >
-                            {lesson.title}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+          ))}
       </>
     );
   };
@@ -336,6 +367,92 @@ function App() {
       </header>
       <main className="app-main">
         <aside className="sidebar">{renderSidebar()}</aside>
+
+        {isImportDialogOpen && (
+          <div className="import-dialog-mask" onClick={() => setIsImportDialogOpen(false)}>
+            <div className="import-dialog" onClick={(e) => e.stopPropagation()}>
+              <div className="import-dialog-header">
+                <h3>导入课程内容</h3>
+                <button
+                  type="button"
+                  className="close-dialog-btn"
+                  onClick={() => setIsImportDialogOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="source-index-import">
+                <div className="source-index-title">Markdown 导入</div>
+                <textarea
+                  value={markdownContent}
+                  onChange={(e) => {
+                    setMarkdownContent(e.target.value);
+                    setImportError(null);
+                    setImportSuccess(null);
+                  }}
+                  placeholder="粘贴 course-java-basics.md 内容"
+                  rows={6}
+                />
+                <div className="source-index-actions">
+                  <label className="upload-file-btn" htmlFor="markdown-file-dialog">
+                    上传 .md
+                  </label>
+                  <input
+                    id="markdown-file-dialog"
+                    type="file"
+                    accept="text/markdown,.md"
+                    onChange={handleMarkdownFileChange}
+                  />
+                  <button
+                    type="button"
+                    className="import-source-btn"
+                    onClick={handleImportMarkdown}
+                    disabled={isImportingMarkdown || !markdownContent.trim()}
+                  >
+                    {isImportingMarkdown ? '导入中...' : '导入 Markdown'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="source-index-import">
+                <div className="source-index-title">源码索引导入</div>
+                <textarea
+                  value={sourceIndexJson}
+                  onChange={(e) => {
+                    setSourceIndexJson(e.target.value);
+                    setImportError(null);
+                    setImportSuccess(null);
+                  }}
+                  placeholder="粘贴 course-java-basics-source-index.json 内容"
+                  rows={6}
+                />
+                <div className="source-index-actions">
+                  <label className="upload-file-btn" htmlFor="source-index-file-dialog">
+                    上传 JSON
+                  </label>
+                  <input
+                    id="source-index-file-dialog"
+                    type="file"
+                    accept="application/json,.json"
+                    onChange={handleSourceIndexFileChange}
+                  />
+                  <button
+                    type="button"
+                    className="import-source-btn"
+                    onClick={handleImportSourceIndex}
+                    disabled={isImportingSourceIndex || !sourceIndexJson.trim()}
+                  >
+                    {isImportingSourceIndex ? '导入中...' : '导入源码索引'}
+                  </button>
+                </div>
+              </div>
+
+              {importError && <div className="import-error">{importError}</div>}
+              {importSuccess && <div className="import-success">{importSuccess}</div>}
+            </div>
+          </div>
+        )}
 
         <section className="content-pane">
           {loadError && <div className="content-error">{loadError}</div>}

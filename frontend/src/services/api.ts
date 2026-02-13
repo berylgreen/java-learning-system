@@ -81,6 +81,15 @@ export const getLessonDetail = async (lessonId: number): Promise<LessonDetail> =
   return response.data;
 };
 
+export const importCourseFromMarkdown = async (markdown: string): Promise<CourseSummary> => {
+  const response = await axios.post<CourseSummary>(`${COURSE_API_BASE_URL}/import`, markdown, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  });
+  return response.data;
+};
+
 export const importCourseFromSourceIndex = async (
   sourceIndexJson: string,
 ): Promise<CourseSummary> => {
