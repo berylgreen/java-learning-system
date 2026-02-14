@@ -96,12 +96,16 @@ class ImportServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals("实现 `solution(String input)`，返回 `\"Hello, \" + input`。", helloLessonExercise.getDescription());
+        assertTrue(helloLessonExercise.getPublicTestCasesJson().contains("Hello, Claude"));
+        assertTrue(helloLessonExercise.getHiddenTestCasesJson().contains("Hello, Bot"));
 
         var singletonLessonExercise = exercises.stream()
                 .filter(exercise -> "9.5 单例模式与线程安全".equals(exercise.getLesson().getTitle()))
                 .findFirst()
                 .orElseThrow();
         assertEquals("实现 `solution(String input)`，无论输入什么都返回固定实例标识 `SINGLETON_INSTANCE`。", singletonLessonExercise.getDescription());
+        assertTrue(singletonLessonExercise.getPublicTestCasesJson().contains("SINGLETON_INSTANCE"));
+        assertTrue(singletonLessonExercise.getHiddenTestCasesJson().contains("SINGLETON_INSTANCE"));
     }
 
     @Test

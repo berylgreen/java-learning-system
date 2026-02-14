@@ -639,6 +639,7 @@ function App() {
                     <div className="exercise-title">{exercise.title}</div>
                     {exercise.description && (
                       <div className="exercise-description">
+                        <div className="exercise-subtitle">题目要求</div>
                         <ReactMarkdown>{exercise.description}</ReactMarkdown>
                       </div>
                     )}

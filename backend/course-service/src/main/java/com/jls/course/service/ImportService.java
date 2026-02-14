@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ public class ImportService {
     private static final String EXERCISE_CONFIG_SECTION_TITLE = "## 课后习题配置（导入用）";
     private static final Pattern LESSON_INDEX_PATTERN = Pattern.compile("^(\\d+)(?:\\.\\d+)?");
     private static final Pattern EXERCISE_MARKER_PATTERN = Pattern.compile("^\\s*-\\s*(.+?)\\s*[：:]\\s*(.+)$");
+    private static final Pattern EXERCISE_CASE_PATTERN = Pattern.compile("^\\s*\\*\\s*(公开|隐藏)\\s*\\|\\s*输入\\s*[：:]\\s*(.*?)\\s*\\|\\s*输出\\s*[：:]\\s*(.*?)\\s*$");
 
     private final CourseRepository courseRepository;
     private final ModuleRepository moduleRepository;
@@ -45,7 +47,7 @@ public class ImportService {
     @Transactional
     public Course importCourse(String markdownContent) {
         String[] lines = markdownContent.split("\n");
-        Map<String, String> configuredExerciseMap = parseExerciseConfig(markdownContent);
+        Map<String, ExerciseConfig> configuredExerciseMap = parseExerciseConfig(markdownContent);
         Course currentCourse = null;
         Module currentModule = null;
         Lesson currentLesson = null;
@@ -126,10 +128,11 @@ public class ImportService {
         return currentCourse;
     }
 
-    private Map<String, String> parseExerciseConfig(String markdownContent) {
+    private Map<String, ExerciseConfig> parseExerciseConfig(String markdownContent) {
         String[] lines = markdownContent.split("\n");
-        Map<String, String> result = new LinkedHashMap<>();
+        Map<String, ExerciseConfig> result = new LinkedHashMap<>();
         boolean inConfigSection = false;
+        String currentLessonTitle = null;
 
         for (String line : lines) {
             if (line.startsWith("## ")) {
@@ -146,36 +149,69 @@ public class ImportService {
                 continue;
             }
 
-            Matcher matcher = EXERCISE_MARKER_PATTERN.matcher(line.trim());
-            if (!matcher.matches()) {
+            Matcher exerciseMatcher = EXERCISE_MARKER_PATTERN.matcher(line.trim());
+            if (exerciseMatcher.matches()) {
+                String lessonTitle = exerciseMatcher.group(1).trim();
+                String exerciseText = exerciseMatcher.group(2).trim();
+                if (!lessonTitle.isBlank()) {
+                    ExerciseConfig config = result.computeIfAbsent(lessonTitle, key -> new ExerciseConfig());
+                    config.setDescription(exerciseText);
+                    currentLessonTitle = lessonTitle;
+                }
                 continue;
             }
 
-            String lessonTitle = matcher.group(1).trim();
-            String exerciseText = matcher.group(2).trim();
-            if (!lessonTitle.isBlank() && !exerciseText.isBlank()) {
-                result.put(lessonTitle, exerciseText);
+            Matcher caseMatcher = EXERCISE_CASE_PATTERN.matcher(line.trim());
+            if (caseMatcher.matches() && currentLessonTitle != null) {
+                ExerciseConfig config = result.get(currentLessonTitle);
+                if (config == null) {
+                    continue;
+                }
+
+                ExerciseTestCaseDTO testCase = ExerciseTestCaseDTO.builder()
+                        .input(normalizeCaseValue(caseMatcher.group(2)))
+                        .expectedOutput(normalizeCaseValue(caseMatcher.group(3)))
+                        .timeoutMs(2000L)
+                        .build();
+
+                if ("公开".equals(caseMatcher.group(1))) {
+                    config.getPublicCases().add(testCase);
+                } else {
+                    config.getHiddenCases().add(testCase);
+                }
             }
         }
 
         return result;
     }
 
+    private String normalizeCaseValue(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalized = value.trim();
+        return "(空)".equals(normalized) ? "" : normalized;
+    }
+
     private void upsertExerciseForLesson(Lesson lesson) {
         upsertExerciseForLesson(lesson, null);
     }
 
-    private void upsertExerciseForLesson(Lesson lesson, String configuredExerciseDescription) {
-        String finalDescription = configuredExerciseDescription == null || configuredExerciseDescription.isBlank()
+    private void upsertExerciseForLesson(Lesson lesson, ExerciseConfig configuredExercise) {
+        String finalDescription = configuredExercise == null || configuredExercise.getDescription() == null
+                || configuredExercise.getDescription().isBlank()
                 ? buildExerciseDescription(lesson.getTitle())
-                : configuredExerciseDescription;
+                : configuredExercise.getDescription();
+
+        String publicCasesJson = resolvePublicCasesJson(lesson.getTitle(), configuredExercise);
+        String hiddenCasesJson = resolveHiddenCasesJson(lesson.getTitle(), configuredExercise);
 
         exerciseRepository.findByLesson(lesson).ifPresentOrElse(existing -> {
             existing.setTitle(buildExerciseTitle(lesson.getTitle()));
             existing.setDescription(finalDescription);
             existing.setStarterCode(buildStarterCode(lesson.getTitle()));
-            existing.setPublicTestCasesJson(buildPublicCasesJson(lesson.getTitle()));
-            existing.setHiddenTestCasesJson(buildHiddenCasesJson(lesson.getTitle()));
+            existing.setPublicTestCasesJson(publicCasesJson);
+            existing.setHiddenTestCasesJson(hiddenCasesJson);
             existing.setPassRule("ALL_PASS");
             exerciseRepository.save(existing);
         }, () -> {
@@ -184,12 +220,26 @@ public class ImportService {
                     .title(buildExerciseTitle(lesson.getTitle()))
                     .description(finalDescription)
                     .starterCode(buildStarterCode(lesson.getTitle()))
-                    .publicTestCasesJson(buildPublicCasesJson(lesson.getTitle()))
-                    .hiddenTestCasesJson(buildHiddenCasesJson(lesson.getTitle()))
+                    .publicTestCasesJson(publicCasesJson)
+                    .hiddenTestCasesJson(hiddenCasesJson)
                     .passRule("ALL_PASS")
                     .build();
             exerciseRepository.save(exercise);
         });
+    }
+
+    private String resolvePublicCasesJson(String lessonTitle, ExerciseConfig configuredExercise) {
+        if (configuredExercise != null && !configuredExercise.getPublicCases().isEmpty()) {
+            return writeAsJson(configuredExercise.getPublicCases());
+        }
+        return buildPublicCasesJson(lessonTitle);
+    }
+
+    private String resolveHiddenCasesJson(String lessonTitle, ExerciseConfig configuredExercise) {
+        if (configuredExercise != null && !configuredExercise.getHiddenCases().isEmpty()) {
+            return writeAsJson(configuredExercise.getHiddenCases());
+        }
+        return buildHiddenCasesJson(lessonTitle);
     }
 
     private String buildExerciseTitle(String lessonTitle) {
@@ -504,6 +554,13 @@ public class ImportService {
         } catch (IOException e) {
             return "// 读取源码文件失败: " + sourceFilePath;
         }
+    }
+
+    @Data
+    private static class ExerciseConfig {
+        private String description;
+        private List<ExerciseTestCaseDTO> publicCases = new ArrayList<>();
+        private List<ExerciseTestCaseDTO> hiddenCases = new ArrayList<>();
     }
 
     @Data

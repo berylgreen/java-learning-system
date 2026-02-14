@@ -1304,49 +1304,143 @@ System.out.println("同一个对象: " + (s1.hashCode() == s2.hashCode()));
 ## 课后习题配置（导入用）
 
 - 1.1 Hello World - 第一个 Java 程序：实现 `solution(String input)`，返回 `"Hello, " + input`。
+  * 公开 | 输入: Claude | 输出: Hello, Claude
+  * 隐藏 | 输入: Bot | 输出: Hello, Bot
 - 1.2 Java 程序结构与注释：实现 `solution(String input)`，删除 `//` 与 `/* */` 注释标记字符后返回结果字符串。
+  * 公开 | 输入: //hello/*java*/ | 输出: hellojava
+  * 隐藏 | 输入: /*A*/B//C | 输出: ABC
 - 2.1 数据类型与变量：实现 `solution(String input)`，输入格式为 `姓名,年龄,成绩`，返回 `姓名:年龄:成绩`。
+  * 公开 | 输入: 张三,18,95 | 输出: 张三:18:95
+  * 隐藏 | 输入: Li,20,88 | 输出: Li:20:88
 - 2.2 类型转换：实现 `solution(String input)`，将输入小数字符串转为 `int` 后返回整数部分。
+  * 公开 | 输入: 12.9 | 输出: 12
+  * 隐藏 | 输入: -3.7 | 输出: -3
 - 2.3 运算符：实现 `solution(String input)`，输入格式为 `a,b`，返回 `a+b,a-b,a*b`。
+  * 公开 | 输入: 8,3 | 输出: 11,5,24
+  * 隐藏 | 输入: -2,5 | 输出: 3,-7,-10
 - 2.4 if-else 条件判断：实现 `solution(String input)`，输入分数字符串，返回 `优秀/良好/及格/不及格`。
+  * 公开 | 输入: 92 | 输出: 优秀
+  * 隐藏 | 输入: 81 | 输出: 良好
 - 2.5 switch-case 分支语句：实现 `solution(String input)`，输入 `1-7`，返回对应 `星期一` 到 `星期日`。
+  * 公开 | 输入: 1 | 输出: 星期一
+  * 隐藏 | 输入: 7 | 输出: 星期日
 - 2.6 while 与 do-while 循环：实现 `solution(String input)`，输入正整数 `n`，返回 `1..n` 的累加和。
+  * 公开 | 输入: 5 | 输出: 15
+  * 隐藏 | 输入: 10 | 输出: 55
 - 2.7 for 循环：实现 `solution(String input)`，输入正整数 `n`，返回 `n` 的阶乘。
+  * 公开 | 输入: 5 | 输出: 120
+  * 隐藏 | 输入: 1 | 输出: 1
 - 2.8 break 与 continue：实现 `solution(String input)`，输入正整数 `n`，返回 `1..n` 中所有奇数（逗号分隔）。
+  * 公开 | 输入: 7 | 输出: 1,3,5,7
+  * 隐藏 | 输入: 2 | 输出: 1
 - 2.9 数组：实现 `solution(String input)`，输入逗号分隔整数数组，返回最大值。
+  * 公开 | 输入: 3,9,2,8 | 输出: 9
+  * 隐藏 | 输入: -5,-2,-11 | 输出: -2
 - 2.10 冒泡排序：实现 `solution(String input)`，输入逗号分隔整数，返回升序结果（逗号分隔）。
+  * 公开 | 输入: 5,1,4,2 | 输出: 1,2,4,5
+  * 隐藏 | 输入: 3,3,1 | 输出: 1,3,3
 - 3.1 类与对象：实现 `solution(String input)`，输入 `name,color,age`，返回 `Cat{name=...,color=...,age=...}`。
+  * 公开 | 输入: Tom,white,2 | 输出: Cat{name=Tom,color=white,age=2}
+  * 隐藏 | 输入: 咪咪,橘色,3 | 输出: Cat{name=咪咪,color=橘色,age=3}
 - 3.2 构造器与 this 关键字：实现 `solution(String input)`，输入 `name,age`，返回 `我叫{name}，今年{age}岁`。
+  * 公开 | 输入: 小明,18 | 输出: 我叫小明，今年18岁
+  * 隐藏 | 输入: Alice,20 | 输出: 我叫Alice，今年20岁
 - 3.3 static 关键字：实现 `solution(String input)`，输入当前对象数，返回新增一个对象后的总数。
+  * 公开 | 输入: 5 | 输出: 6
+  * 隐藏 | 输入: 0 | 输出: 1
 - 3.4 方法重载：实现 `solution(String input)`，输入 `a,b` 或 `a,b,c`，返回所有数字之和。
+  * 公开 | 输入: 2,3 | 输出: 5
+  * 隐藏 | 输入: 1,2,3 | 输出: 6
 - 4.1 封装：实现 `solution(String input)`，输入 `余额,操作,金额`，操作为 `deposit/withdraw`，返回操作后余额。
+  * 公开 | 输入: 100,deposit,30 | 输出: 130
+  * 隐藏 | 输入: 100,withdraw,40 | 输出: 60
 - 4.2 继承：实现 `solution(String input)`，输入 `cat|dog,名字`，返回该动物的特有行为描述。
+  * 公开 | 输入: cat,咪咪 | 输出: 咪咪:喵喵叫
+  * 隐藏 | 输入: dog,旺财 | 输出: 旺财:汪汪叫
 - 4.3 方法重写与多态：实现 `solution(String input)`，输入 `circle,r` 或 `rect,w,h`，返回面积（保留两位小数）。
+  * 公开 | 输入: circle,2 | 输出: 12.57
+  * 隐藏 | 输入: rect,3,4 | 输出: 12.00
 - 4.4 toString 与 equals 方法：实现 `solution(String input)`，输入 `name,age|name,age`，返回两个对象内容是否相等。
+  * 公开 | 输入: Tom,18|Tom,18 | 输出: true
+  * 隐藏 | 输入: Tom,18|Tom,19 | 输出: false
 - 4.5 final 关键字：实现 `solution(String input)`，输入半径，使用常量 `PI=3.14159` 计算圆面积并返回。
+  * 公开 | 输入: 2 | 输出: 12.57
+  * 隐藏 | 输入: 3 | 输出: 28.27
 - 5.1 抽象类：实现 `solution(String input)`，输入 `car|boat,brand`，返回对应运行描述。
+  * 公开 | 输入: car,比亚迪 | 输出: 比亚迪 在陆地行驶
+  * 隐藏 | 输入: boat,海燕 | 输出: 海燕 在水上航行
 - 5.2 接口：实现 `solution(String input)`，输入 `fly|swim,name`，返回行为描述。
+  * 公开 | 输入: fly,小鸟 | 输出: 小鸟 正在飞行
+  * 隐藏 | 输入: swim,小鱼 | 输出: 小鱼 正在游泳
 - 5.3 内部类：实现 `solution(String input)`，输入姓名，返回匿名内部类风格问候语。
+  * 公开 | 输入: 小王 | 输出: 你好，小王（来自内部类）
+  * 隐藏 | 输入: 阿强 | 输出: 你好，阿强（来自内部类）
 - 5.4 Lambda 表达式：实现 `solution(String input)`，输入 `a,b,op`，`op` 为 `add/sub/mul`，返回运算结果。
+  * 公开 | 输入: 7,3,add | 输出: 10
+  * 隐藏 | 输入: 7,3,mul | 输出: 21
 - 5.5 函数式接口与方法引用：实现 `solution(String input)`，输入逗号分隔姓名列表，返回姓“张”的人数。
+  * 公开 | 输入: 张三,李四,张飞 | 输出: 2
+  * 隐藏 | 输入: 王五,赵六 | 输出: 0
 - 6.1 异常概述：实现 `solution(String input)`，输入除数，返回 `10/除数`；若除数为 0 返回 `ArithmeticException`。
+  * 公开 | 输入: 2 | 输出: 5
+  * 隐藏 | 输入: 0 | 输出: ArithmeticException
 - 6.2 try-catch-finally：实现 `solution(String input)`，输入整数，计算 `100/input`，异常时返回 `ERROR`，结果后拼接 `|FINALLY`。
+  * 公开 | 输入: 4 | 输出: 25|FINALLY
+  * 隐藏 | 输入: 0 | 输出: ERROR|FINALLY
 - 6.3 throw 与 throws：实现 `solution(String input)`，输入年龄，合法区间 `0-150` 返回 `OK`，否则返回 `年龄不合法`。
+  * 公开 | 输入: 30 | 输出: OK
+  * 隐藏 | 输入: 200 | 输出: 年龄不合法
 - 6.4 String 类常用方法：实现 `solution(String input)`，返回 `trim` 后的大写字符串与长度（格式 `TEXT|LEN`）。
+  * 公开 | 输入:   java   | 输出: JAVA|4
+  * 隐藏 | 输入:  AbC  | 输出: ABC|3
 - 6.5 StringBuilder 与字符串拼接：实现 `solution(String input)`，输入逗号分隔单词，拼接后反转并返回。
+  * 公开 | 输入: a,b,c | 输出: cba
+  * 隐藏 | 输入: java,is,fun | 输出: nufsavaj
 - 6.6 Math 与 Random：实现 `solution(String input)`，输入整数 `n`，返回 `abs(n),sqrt(abs(n))`（平方根保留两位小数）。
+  * 公开 | 输入: -9 | 输出: 9,3.00
+  * 隐藏 | 输入: 2 | 输出: 2,1.41
 - 7.1 集合概述与 ArrayList：实现 `solution(String input)`，输入逗号分隔元素，返回列表长度与是否包含 `Java`。
+  * 公开 | 输入: Java,Spring,JPA | 输出: 3|true
+  * 隐藏 | 输入: Python,Go | 输出: 2|false
 - 7.2 LinkedList：实现 `solution(String input)`，输入逗号分隔任务队列，返回出队前两个任务（逗号分隔）。
+  * 公开 | 输入: A,B,C | 输出: A,B
+  * 隐藏 | 输入: 任务1,任务2 | 输出: 任务1,任务2
 - 7.3 HashSet 与 TreeSet：实现 `solution(String input)`，输入逗号分隔整数，去重并升序返回。
+  * 公开 | 输入: 3,1,3,2 | 输出: 1,2,3
+  * 隐藏 | 输入: -1,2,-1 | 输出: -1,2
 - 7.4 HashMap：实现 `solution(String input)`，输入 `name=score;...`，返回分数最高的 `name`。
+  * 公开 | 输入: Tom=78;Jerry=88;Lucy=80 | 输出: Jerry
+  * 隐藏 | 输入: 张三=99;李四=60 | 输出: 张三
 - 7.5 泛型：实现 `solution(String input)`，输入逗号分隔元素，返回第一个元素与总个数（格式 `first|count`）。
+  * 公开 | 输入: a,b,c | 输出: a|3
+  * 隐藏 | 输入: 5,6 | 输出: 5|2
 - 7.6 Stream API：实现 `solution(String input)`，输入逗号分隔整数，返回去重后偶数升序结果。
+  * 公开 | 输入: 5,2,2,4,3,6 | 输出: 2,4,6
+  * 隐藏 | 输入: 1,3,5 | 输出: (空)
 - 8.1 File 类：实现 `solution(String input)`，输入文件路径字符串，返回文件名（不含目录）。
+  * 公开 | 输入: C:/tmp/a.txt | 输出: a.txt
+  * 隐藏 | 输入: /home/user/Main.java | 输出: Main.java
 - 8.2 字节流 InputStream 与 OutputStream：实现 `solution(String input)`，返回输入字符串 UTF-8 字节长度。
+  * 公开 | 输入: 你好 | 输出: 6
+  * 隐藏 | 输入: abc | 输出: 3
 - 8.3 字符流 Reader 与 Writer：实现 `solution(String input)`，输入包含 `\\n` 的文本，返回行数。
+  * 公开 | 输入: a\\nb\\nc | 输出: 3
+  * 隐藏 | 输入: one line | 输出: 1
 - 8.4 对象序列化：实现 `solution(String input)`，输入 `name,level,password`，返回 `name,level`（忽略 password）。
+  * 公开 | 输入: alice,5,secret | 输出: alice,5
+  * 隐藏 | 输入: bob,1,123456 | 输出: bob,1
 - 9.1 线程创建方式：实现 `solution(String input)`，输入任务数 `n`，返回模拟执行标记 `T1...Tn`。
+  * 公开 | 输入: 3 | 输出: T1,T2,T3
+  * 隐藏 | 输入: 1 | 输出: T1
 - 9.2 线程状态与常用方法：实现 `solution(String input)`，返回 `NEW->RUNNABLE->TERMINATED`。
+  * 公开 | 输入: (空) | 输出: NEW->RUNNABLE->TERMINATED
+  * 隐藏 | 输入: anything | 输出: NEW->RUNNABLE->TERMINATED
 - 9.3 线程同步：实现 `solution(String input)`，输入票数与窗口数 `tickets,workers`，返回最终剩余票数。
+  * 公开 | 输入: 10,3 | 输出: 7
+  * 隐藏 | 输入: 2,5 | 输出: 0
 - 9.4 线程池：实现 `solution(String input)`，输入 `tasks,poolSize`，返回完成全部任务所需批次数。
+  * 公开 | 输入: 10,3 | 输出: 4
+  * 隐藏 | 输入: 5,2 | 输出: 3
 - 9.5 单例模式与线程安全：实现 `solution(String input)`，无论输入什么都返回固定实例标识 `SINGLETON_INSTANCE`。
+  * 公开 | 输入: demo | 输出: SINGLETON_INSTANCE
+  * 隐藏 | 输入: (空) | 输出: SINGLETON_INSTANCE
