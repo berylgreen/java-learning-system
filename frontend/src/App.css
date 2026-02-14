@@ -475,6 +475,21 @@
   margin: 0;
 }
 
+.exercise-answer {
+  margin-top: 0.5rem;
+  border: 1px solid #dbeafe;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  color: #1e40af;
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.exercise-answer p {
+  margin: 0;
+}
+
 .exercise-public-cases ul,
 .exercise-public-results ul {
   margin: 0;

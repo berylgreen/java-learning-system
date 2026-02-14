@@ -1304,190 +1304,237 @@ System.out.println("同一个对象: " + (s1.hashCode() == s2.hashCode()));
 ## 课后习题配置（导入用）
 
 - 1.1 Hello World - 第一个 Java 程序：实现 `solution(String input)`，返回 `"Hello, " + input`。
+  * 答案: String solution(String input){\n    return "Hello, " + input;\n}
   * 提示: 直接返回 `"Hello, " + input`；注意逗号后必须有一个空格，且不要追加换行或多余空格；输入为空时也按同样规则拼接。
   * 公开 | 输入: Claude | 输出: Hello, Claude
   * 隐藏 | 输入: Bot | 输出: Hello, Bot
 - 1.2 Java 程序结构与注释：实现 `solution(String input)`，删除 `//` 与 `/* */` 注释标记字符后返回结果字符串。
+  * 答案: String solution(String input){ return input; }
   * 提示: 题目只要求去掉标记字符本身，不需要做真正语法解析；可按顺序执行 `replace("//", "")`、`replace("/*", "")`、`replace("*/", "")`，最后返回结果。
   * 公开 | 输入: //hello/*java*/ | 输出: hellojava
   * 隐藏 | 输入: /*A*/B//C | 输出: ABC
 - 2.1 数据类型与变量：实现 `solution(String input)`，输入格式为 `姓名,年龄,成绩`，返回 `姓名:年龄:成绩`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先按逗号拆分成 3 段并分别 `trim()`，再按 `姓名 + ":" + 年龄 + ":" + 成绩` 拼接；不要改变字段顺序，也不要对年龄和成绩做数值计算。
   * 公开 | 输入: 张三,18,95 | 输出: 张三:18:95
   * 隐藏 | 输入: Li,20,88 | 输出: Li:20:88
 - 2.2 类型转换：实现 `solution(String input)`，将输入小数字符串转为 `int` 后返回整数部分。
+  * 答案: String solution(String input){ return input; }
   * 提示: 可先 `Double.parseDouble(input.trim())`，再强制转换为 `int`；Java 的 `(int)` 是“向 0 截断”，所以 `12.9 -> 12`、`-3.7 -> -3`。
   * 公开 | 输入: 12.9 | 输出: 12
   * 隐藏 | 输入: -3.7 | 输出: -3
 - 2.3 运算符：实现 `solution(String input)`，输入格式为 `a,b`，返回 `a+b,a-b,a*b`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 拆分得到两个整数 `a`、`b` 后依次计算 `sum/diff/prod`；输出格式必须严格为 `sum,diff,prod`，逗号两侧不要加空格。
   * 公开 | 输入: 8,3 | 输出: 11,5,24
   * 隐藏 | 输入: -2,5 | 输出: 3,-7,-10
 - 2.4 if-else 条件判断：实现 `solution(String input)`，输入分数字符串，返回 `优秀/良好/及格/不及格`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 建议按分数从高到低判断：`>=90` 优秀，`>=80` 良好，`>=60` 及格，否则不及格；这样区间不会重叠也不易漏判。
   * 公开 | 输入: 92 | 输出: 优秀
   * 隐藏 | 输入: 81 | 输出: 良好
 - 2.5 switch-case 分支语句：实现 `solution(String input)`，输入 `1-7`，返回对应 `星期一` 到 `星期日`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 把输入转成整数后使用 `switch` 映射：1→星期一 ... 7→星期日；每个分支注意 `break`，避免贯穿到下一个分支。
   * 公开 | 输入: 1 | 输出: 星期一
   * 隐藏 | 输入: 7 | 输出: 星期日
 - 2.6 while 与 do-while 循环：实现 `solution(String input)`，输入正整数 `n`，返回 `1..n` 的累加和。
+  * 答案: String solution(String input){ return input; }
   * 提示: 可用 `while`：从 `i=1` 循环到 `n`，每次 `sum += i`；也可用 `do-while`，但要先初始化计数器并确保结束条件正确。
   * 公开 | 输入: 5 | 输出: 15
   * 隐藏 | 输入: 10 | 输出: 55
 - 2.7 for 循环：实现 `solution(String input)`，输入正整数 `n`，返回 `n` 的阶乘。
+  * 答案: String solution(String input){ return input; }
   * 提示: 初始化 `result=1`，循环 `for (i=1; i<=n; i++) result*=i`；当 `n=1` 时应直接得到 1，注意不要把初始值写成 0。
   * 公开 | 输入: 5 | 输出: 120
   * 隐藏 | 输入: 1 | 输出: 1
 - 2.8 break 与 continue：实现 `solution(String input)`，输入正整数 `n`，返回 `1..n` 中所有奇数（逗号分隔）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 遍历 `1..n` 时，遇到偶数用 `continue` 跳过；奇数加入结果列表，最后用逗号拼接，避免字符串末尾出现多余逗号。
   * 公开 | 输入: 7 | 输出: 1,3,5,7
   * 隐藏 | 输入: 2 | 输出: 1
 - 2.9 数组：实现 `solution(String input)`，输入逗号分隔整数数组，返回最大值。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先拆分并解析为整数数组，再用第一个元素初始化 `max`，逐个比较更新；负数场景也必须正确处理，不能把 `max` 固定为 0。
   * 公开 | 输入: 3,9,2,8 | 输出: 9
   * 隐藏 | 输入: -5,-2,-11 | 输出: -2
 - 2.10 冒泡排序：实现 `solution(String input)`，输入逗号分隔整数，返回升序结果（逗号分隔）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 冒泡核心是双层循环，若前一个元素大于后一个就交换；外层每轮把一个最大值“冒”到末尾，最后按升序数组重新拼接为逗号分隔字符串。
   * 公开 | 输入: 5,1,4,2 | 输出: 1,2,4,5
   * 隐藏 | 输入: 3,3,1 | 输出: 1,3,3
 - 3.1 类与对象：实现 `solution(String input)`，输入 `name,color,age`，返回 `Cat{name=...,color=...,age=...}`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先按逗号拆分出 `name/color/age` 三个字段，再按固定模板拼接；花括号、字段名、逗号位置都要与示例一致，避免大小写或符号偏差。
   * 公开 | 输入: Tom,white,2 | 输出: Cat{name=Tom,color=white,age=2}
   * 隐藏 | 输入: 咪咪,橘色,3 | 输出: Cat{name=咪咪,color=橘色,age=3}
 - 3.2 构造器与 this 关键字：实现 `solution(String input)`，输入 `name,age`，返回 `我叫{name}，今年{age}岁`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 拆分后直接套用句式 `我叫` + name + `，今年` + age + `岁`；中文逗号必须是全角 `，`，不要误写成英文逗号。
   * 公开 | 输入: 小明,18 | 输出: 我叫小明，今年18岁
   * 隐藏 | 输入: Alice,20 | 输出: 我叫Alice，今年20岁
 - 3.3 static 关键字：实现 `solution(String input)`，输入当前对象数，返回新增一个对象后的总数。
+  * 答案: String solution(String input){ return input; }
   * 提示: 输入表示“当前数量”，本题本质是自增 1；先把字符串转整数，再执行 `count + 1`，最后转回字符串返回。
   * 公开 | 输入: 5 | 输出: 6
   * 隐藏 | 输入: 0 | 输出: 1
 - 3.4 方法重载：实现 `solution(String input)`，输入 `a,b` 或 `a,b,c`，返回所有数字之和。
+  * 答案: String solution(String input){ return input; }
   * 提示: 可通过 `split(",")` 后判断长度为 2 或 3，再分别求和；也可以统一遍历数组累加，这样兼容两种输入格式更稳妥。
   * 公开 | 输入: 2,3 | 输出: 5
   * 隐藏 | 输入: 1,2,3 | 输出: 6
 - 4.1 封装：实现 `solution(String input)`，输入 `余额,操作,金额`，操作为 `deposit/withdraw`，返回操作后余额。
+  * 答案: String solution(String input){ return input; }
   * 提示: 解析出 `balance/op/amount` 后按操作分支：`deposit` 做加法，`withdraw` 做减法；仅返回最终余额数值，不拼接额外文本。
   * 公开 | 输入: 100,deposit,30 | 输出: 130
   * 隐藏 | 输入: 100,withdraw,40 | 输出: 60
 - 4.2 继承：实现 `solution(String input)`，输入 `cat|dog,名字`，返回该动物的特有行为描述。
+  * 答案: String solution(String input){ return input; }
   * 提示: 第一个字段是类型，第二个字段是名字；`cat` 输出 `名字:喵喵叫`，`dog` 输出 `名字:汪汪叫`，冒号前后不要加空格。
   * 公开 | 输入: cat,咪咪 | 输出: 咪咪:喵喵叫
   * 隐藏 | 输入: dog,旺财 | 输出: 旺财:汪汪叫
 - 4.3 方法重写与多态：实现 `solution(String input)`，输入 `circle,r` 或 `rect,w,h`，返回面积（保留两位小数）。
+  * 答案: String solution(String input){ return input; }
   * 提示: `circle` 使用 `πr²`，`rect` 使用 `w*h`；结果用两位小数格式化（如 `String.format("%.2f", area)`），确保 `12` 输出为 `12.00`。
   * 公开 | 输入: circle,2 | 输出: 12.57
   * 隐藏 | 输入: rect,3,4 | 输出: 12.00
 - 4.4 toString 与 equals 方法：实现 `solution(String input)`，输入 `name,age|name,age`，返回两个对象内容是否相等。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先按 `|` 分成左右两组，再分别解析 `name` 和 `age`；当两个对象字段都相同返回 `true`，否则返回 `false`，输出必须为小写布尔字面量。
   * 公开 | 输入: Tom,18|Tom,18 | 输出: true
   * 隐藏 | 输入: Tom,18|Tom,19 | 输出: false
 - 4.5 final 关键字：实现 `solution(String input)`，输入半径，使用常量 `PI=3.14159` 计算圆面积并返回。
+  * 答案: String solution(String input){ return input; }
   * 提示: 使用固定常量 `PI=3.14159`，按 `PI * r * r` 计算面积，并保留两位小数；重点是常量值固定不变且格式统一。
   * 公开 | 输入: 2 | 输出: 12.57
   * 隐藏 | 输入: 3 | 输出: 28.27
 - 5.1 抽象类：实现 `solution(String input)`，输入 `car|boat,brand`，返回对应运行描述。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先拆分得到 `type` 和 `brand`；当 `type=car` 返回 `brand + " 在陆地行驶"`，当 `type=boat` 返回 `brand + " 在水上航行"`，输出文案需与示例完全一致。
   * 公开 | 输入: car,比亚迪 | 输出: 比亚迪 在陆地行驶
   * 隐藏 | 输入: boat,海燕 | 输出: 海燕 在水上航行
 - 5.2 接口：实现 `solution(String input)`，输入 `fly|swim,name`，返回行为描述。
+  * 答案: String solution(String input){ return input; }
   * 提示: 输入格式是 `动作,名字`；`fly` 映射为 `名字 正在飞行`，`swim` 映射为 `名字 正在游泳`，注意中间保留一个空格。
   * 公开 | 输入: fly,小鸟 | 输出: 小鸟 正在飞行
   * 隐藏 | 输入: swim,小鱼 | 输出: 小鱼 正在游泳
 - 5.3 内部类：实现 `solution(String input)`，输入姓名，返回匿名内部类风格问候语。
+  * 答案: String solution(String input){ return input; }
   * 提示: 本题本质是模板字符串拼接：`你好，` + name + `（来自内部类）`；括号必须使用全角 `（ ）`，不要写成半角括号。
   * 公开 | 输入: 小王 | 输出: 你好，小王（来自内部类）
   * 隐藏 | 输入: 阿强 | 输出: 你好，阿强（来自内部类）
 - 5.4 Lambda 表达式：实现 `solution(String input)`，输入 `a,b,op`，`op` 为 `add/sub/mul`，返回运算结果。
+  * 答案: String solution(String input){ return input; }
   * 提示: 拆分后将前两个字段转为整数，根据 `op` 分支计算：`add` 加法、`sub` 减法、`mul` 乘法；返回纯数字字符串。
   * 公开 | 输入: 7,3,add | 输出: 10
   * 隐藏 | 输入: 7,3,mul | 输出: 21
 - 5.5 函数式接口与方法引用：实现 `solution(String input)`，输入逗号分隔姓名列表，返回姓“张”的人数。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先按逗号拆分并 `trim()`，再统计以 `张` 开头的元素个数；可用循环，也可用 `stream().filter(name -> name.startsWith("张"))`。
   * 公开 | 输入: 张三,李四,张飞 | 输出: 2
   * 隐藏 | 输入: 王五,赵六 | 输出: 0
 - 6.1 异常概述：实现 `solution(String input)`，输入除数，返回 `10/除数`；若除数为 0 返回 `ArithmeticException`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先把输入转成整数 `d`；若 `d==0` 直接返回固定字符串 `ArithmeticException`，否则计算整数除法 `10 / d` 并转字符串。
   * 公开 | 输入: 2 | 输出: 5
   * 隐藏 | 输入: 0 | 输出: ArithmeticException
 - 6.2 try-catch-finally：实现 `solution(String input)`，输入整数，计算 `100/input`，异常时返回 `ERROR`，结果后拼接 `|FINALLY`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 用 `try` 计算 `100 / n`，`catch` 时把结果设为 `ERROR`；无论成功或失败，最终返回 `结果 + "|FINALLY"`，保证后缀始终存在。
   * 公开 | 输入: 4 | 输出: 25|FINALLY
   * 隐藏 | 输入: 0 | 输出: ERROR|FINALLY
 - 6.3 throw 与 throws：实现 `solution(String input)`，输入年龄，合法区间 `0-150` 返回 `OK`，否则返回 `年龄不合法`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 解析年龄后判断是否在闭区间 `[0,150]`；在区间内返回 `OK`，否则返回 `年龄不合法`，边界值 `0` 和 `150` 都应判为合法。
   * 公开 | 输入: 30 | 输出: OK
   * 隐藏 | 输入: 200 | 输出: 年龄不合法
 - 6.4 String 类常用方法：实现 `solution(String input)`，返回 `trim` 后的大写字符串与长度（格式 `TEXT|LEN`）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 顺序建议为：`trim()` 去首尾空白 → `toUpperCase()` 转大写 → 取 `length()`；最后按 `TEXT|LEN` 拼接，竖线两侧不要空格。
   * 公开 | 输入:   java   | 输出: JAVA|4
   * 隐藏 | 输入:  AbC  | 输出: ABC|3
 - 6.5 StringBuilder 与字符串拼接：实现 `solution(String input)`，输入逗号分隔单词，拼接后反转并返回。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先去掉逗号把所有片段连成一个字符串，再用 `StringBuilder` 的 `reverse()` 反转；输出中不应包含逗号和空格。
   * 公开 | 输入: a,b,c | 输出: cba
   * 隐藏 | 输入: java,is,fun | 输出: nufsavaj
 - 6.6 Math 与 Random：实现 `solution(String input)`，输入整数 `n`，返回 `abs(n),sqrt(abs(n))`（平方根保留两位小数）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先求 `abs = Math.abs(n)`，再求 `sqrt = Math.sqrt(abs)`；输出格式为 `abs,xx.xx`，第二项必须保留两位小数（可用 `String.format("%.2f", sqrt)`）。
   * 公开 | 输入: -9 | 输出: 9,3.00
   * 隐藏 | 输入: 2 | 输出: 2,1.41
 - 7.1 集合概述与 ArrayList：实现 `solution(String input)`，输入逗号分隔元素，返回列表长度与是否包含 `Java`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 拆分后放入列表，长度是元素个数；`contains("Java")` 是区分大小写的，最后按 `数量|布尔值` 返回，例如 `3|true`。
   * 公开 | 输入: Java,Spring,JPA | 输出: 3|true
   * 隐藏 | 输入: Python,Go | 输出: 2|false
 - 7.2 LinkedList：实现 `solution(String input)`，输入逗号分隔任务队列，返回出队前两个任务（逗号分隔）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 题目强调“出队”，语义上可用 `poll()` 连续取两次；将两次结果按 `task1,task2` 拼接返回，顺序必须与原队列一致。
   * 公开 | 输入: A,B,C | 输出: A,B
   * 隐藏 | 输入: 任务1,任务2 | 输出: 任务1,任务2
 - 7.3 HashSet 与 TreeSet：实现 `solution(String input)`，输入逗号分隔整数，去重并升序返回。
+  * 答案: String solution(String input){ return input; }
   * 提示: 可先放入 `Set` 去重，再放入 `TreeSet` 或排序列表实现升序；最后重新按逗号连接，保证无重复且从小到大。
   * 公开 | 输入: 3,1,3,2 | 输出: 1,2,3
   * 隐藏 | 输入: -1,2,-1 | 输出: -1,2
 - 7.4 HashMap：实现 `solution(String input)`，输入 `name=score;...`，返回分数最高的 `name`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 先按 `;` 拆成键值对，再按 `=` 解析姓名和分数；遍历时维护当前最大分数和对应姓名，最终返回姓名字符串。
   * 公开 | 输入: Tom=78;Jerry=88;Lucy=80 | 输出: Jerry
   * 隐藏 | 输入: 张三=99;李四=60 | 输出: 张三
 - 7.5 泛型：实现 `solution(String input)`，输入逗号分隔元素，返回第一个元素与总个数（格式 `first|count`）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 拆分后第一个元素是 `parts[0]`，总个数是 `parts.length`；按 `first|count` 组合输出，不要改变元素原始文本。
   * 公开 | 输入: a,b,c | 输出: a|3
   * 隐藏 | 输入: 5,6 | 输出: 5|2
 - 7.6 Stream API：实现 `solution(String input)`，输入逗号分隔整数，返回去重后偶数升序结果。
+  * 答案: String solution(String input){ return input; }
   * 提示: 处理流程可固定为：解析整数 → 过滤偶数 → 去重 → 升序 → 逗号拼接；若结果为空，必须返回字面量 `(空)`。
   * 公开 | 输入: 5,2,2,4,3,6 | 输出: 2,4,6
   * 隐藏 | 输入: 1,3,5 | 输出: (空)
 - 8.1 File 类：实现 `solution(String input)`，输入文件路径字符串，返回文件名（不含目录）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 文件名是最后一个路径分隔符后的部分；可用 `new File(path).getName()`，或手动同时兼容 `/` 与 `\\` 两种分隔符。
   * 公开 | 输入: C:/tmp/a.txt | 输出: a.txt
   * 隐藏 | 输入: /home/user/Main.java | 输出: Main.java
 - 8.2 字节流 InputStream 与 OutputStream：实现 `solution(String input)`，返回输入字符串 UTF-8 字节长度。
+  * 答案: String solution(String input){ return input; }
   * 提示: 不能用 `length()` 统计字符数，应使用 `input.getBytes(StandardCharsets.UTF_8).length`；中文通常占 3 字节，所以“你好”是 6。
   * 公开 | 输入: 你好 | 输出: 6
   * 隐藏 | 输入: abc | 输出: 3
 - 8.3 字符流 Reader 与 Writer：实现 `solution(String input)`，输入包含 `\\n` 的文本，返回行数。
+  * 答案: String solution(String input){ return input; }
   * 提示: 这里的 `\\n` 是字面分隔符，可按 `"\\\\n"` 拆分统计段数；例如 `a\\nb\\nc` 分成 3 段，单行文本则为 1。
   * 公开 | 输入: a\\nb\\nc | 输出: 3
   * 隐藏 | 输入: one line | 输出: 1
 - 8.4 对象序列化：实现 `solution(String input)`，输入 `name,level,password`，返回 `name,level`（忽略 password）。
+  * 答案: String solution(String input){ return input; }
   * 提示: 拆分为三个字段后仅保留前两个：`name` 与 `level`；按 `name + "," + level` 返回，不要把第三个字段带入结果。
   * 公开 | 输入: alice,5,secret | 输出: alice,5
   * 隐藏 | 输入: bob,1,123456 | 输出: bob,1
 - 9.1 线程创建方式：实现 `solution(String input)`，输入任务数 `n`，返回模拟执行标记 `T1...Tn`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 本题是字符串构造题：从 1 循环到 `n` 生成 `T1,T2,...,Tn`；可用列表收集后 `join`，避免末尾多逗号。
   * 公开 | 输入: 3 | 输出: T1,T2,T3
   * 隐藏 | 输入: 1 | 输出: T1
 - 9.2 线程状态与常用方法：实现 `solution(String input)`，返回 `NEW->RUNNABLE->TERMINATED`。
+  * 答案: String solution(String input){ return input; }
   * 提示: 输入内容不参与计算，直接返回固定状态流转字符串 `NEW->RUNNABLE->TERMINATED` 即可，注意箭头和大小写一致。
   * 公开 | 输入: (空) | 输出: NEW->RUNNABLE->TERMINATED
   * 隐藏 | 输入: anything | 输出: NEW->RUNNABLE->TERMINATED
 - 9.3 线程同步：实现 `solution(String input)`，输入票数与窗口数 `tickets,workers`，返回最终剩余票数。
+  * 答案: String solution(String input){ return input; }
   * 提示: 可按“每个窗口卖出 1 张”建模，剩余票数为 `tickets - workers`；若结果小于 0 则返回 0，可用 `Math.max(tickets - workers, 0)`。
   * 公开 | 输入: 10,3 | 输出: 7
   * 隐藏 | 输入: 2,5 | 输出: 0
 - 9.4 线程池：实现 `solution(String input)`，输入 `tasks,poolSize`，返回完成全部任务所需批次数。
+  * 答案: String solution(String input){ return input; }
   * 提示: 本质是向上取整除法：`ceil(tasks / poolSize)`；整数写法可用 `(tasks + poolSize - 1) / poolSize`，这是最稳妥的批次数计算方式。
   * 公开 | 输入: 10,3 | 输出: 4
   * 隐藏 | 输入: 5,2 | 输出: 3
 - 9.5 单例模式与线程安全：实现 `solution(String input)`，无论输入什么都返回固定实例标识 `SINGLETON_INSTANCE`。
+  * 答案: String solution(String input){ return "SINGLETON_INSTANCE"; }
   * 提示: 这是固定输出题，忽略输入参数，始终 `return "SINGLETON_INSTANCE"`；不要拼接输入，也不要改变大小写。
   * 公开 | 输入: demo | 输出: SINGLETON_INSTANCE
   * 隐藏 | 输入: (空) | 输出: SINGLETON_INSTANCE

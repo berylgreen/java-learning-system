@@ -49,6 +49,9 @@ public class Exercise {
     @Column(columnDefinition = "TEXT")
     private String answerHint;
 
+    @Column(columnDefinition = "TEXT")
+    private String answerCode;
+
     @Column(nullable = false)
     @Builder.Default
     private String passRule = "ALL_PASS";

@@ -57,6 +57,7 @@ function App() {
   const [isSubmittingExercise, setIsSubmittingExercise] = useState(false);
   const [exerciseError, setExerciseError] = useState<string | null>(null);
   const [isHintVisible, setIsHintVisible] = useState(false);
+  const [isAnswerVisible, setIsAnswerVisible] = useState(false);
 
   const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
@@ -277,6 +278,7 @@ function App() {
       setExerciseResult(null);
       setExerciseError(null);
       setIsHintVisible(false);
+      setIsAnswerVisible(false);
       return;
     }
 
@@ -284,6 +286,7 @@ function App() {
       setIsLoadingExercise(true);
       setExerciseError(null);
       setIsHintVisible(false);
+      setIsAnswerVisible(false);
       try {
         const exerciseData = await getLessonExercise(selectedLessonId);
         setExercise(exerciseData);
@@ -340,6 +343,13 @@ function App() {
       return;
     }
     setCode(exercise.starterCode);
+  };
+
+  const handleUseAnswerCode = () => {
+    if (!exercise?.answerCode?.trim()) {
+      return;
+    }
+    setCode(exercise.answerCode);
   };
 
   const handleSubmitExercise = async () => {
@@ -634,6 +644,22 @@ function App() {
                     </button>
                     <button
                       type="button"
+                      className="exercise-btn secondary"
+                      onClick={() => setIsAnswerVisible((prev) => !prev)}
+                      disabled={!exercise?.answerCode}
+                    >
+                      {isAnswerVisible ? '隐藏答案' : '查看答案'}
+                    </button>
+                    <button
+                      type="button"
+                      className="exercise-btn secondary"
+                      onClick={handleUseAnswerCode}
+                      disabled={!exercise?.answerCode}
+                    >
+                      使用答案
+                    </button>
+                    <button
+                      type="button"
                       className="exercise-btn primary"
                       onClick={handleSubmitExercise}
                       disabled={isSubmittingExercise || !exercise}
@@ -658,6 +684,12 @@ function App() {
                       <div className="exercise-hint">
                         <div className="exercise-subtitle">提示答案</div>
                         <ReactMarkdown>{exercise.answerHint}</ReactMarkdown>
+                      </div>
+                    )}
+                    {isAnswerVisible && exercise.answerCode && (
+                      <div className="exercise-answer">
+                        <div className="exercise-subtitle">标准答案</div>
+                        <ReactMarkdown>{exercise.answerCode}</ReactMarkdown>
                       </div>
                     )}
                     {exercise.publicTestCases?.length > 0 && (

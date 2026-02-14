@@ -89,6 +89,8 @@ class ImportServiceTest {
             assertNotNull(exercise.getStarterCode());
             assertTrue(exercise.getPublicTestCasesJson().contains("expectedOutput"));
             assertTrue(exercise.getHiddenTestCasesJson().contains("expectedOutput"));
+            assertNotNull(exercise.getAnswerCode());
+            assertFalse(exercise.getAnswerCode().isBlank());
         });
 
         var helloLessonExercise = exercises.stream()
@@ -96,7 +98,10 @@ class ImportServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals("实现 `solution(String input)`，返回 `\"Hello, \" + input`。", helloLessonExercise.getDescription());
-        assertEquals("直接使用字符串拼接，注意保留逗号和空格。", helloLessonExercise.getAnswerHint());
+        assertEquals("直接返回 `\"Hello, \" + input`；注意逗号后必须有一个空格，且不要追加换行或多余空格；输入为空时也按同样规则拼接。", helloLessonExercise.getAnswerHint());
+        assertEquals("String solution(String input){\n    return \"Hello, \" + input;\n}", helloLessonExercise.getAnswerCode());
+        assertTrue(helloLessonExercise.getAnswerCode().contains("\n"));
+        assertFalse(helloLessonExercise.getAnswerCode().contains("\\n"));
         assertTrue(helloLessonExercise.getPublicTestCasesJson().contains("Hello, Claude"));
         assertTrue(helloLessonExercise.getHiddenTestCasesJson().contains("Hello, Bot"));
 
@@ -105,6 +110,7 @@ class ImportServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals("实现 `solution(String input)`，无论输入什么都返回固定实例标识 `SINGLETON_INSTANCE`。", singletonLessonExercise.getDescription());
+        assertEquals("String solution(String input){ return \"SINGLETON_INSTANCE\"; }", singletonLessonExercise.getAnswerCode());
         assertTrue(singletonLessonExercise.getPublicTestCasesJson().contains("SINGLETON_INSTANCE"));
         assertTrue(singletonLessonExercise.getHiddenTestCasesJson().contains("SINGLETON_INSTANCE"));
     }

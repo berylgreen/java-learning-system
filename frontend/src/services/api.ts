@@ -54,6 +54,7 @@ export interface Exercise {
   title: string;
   description?: string;
   answerHint?: string;
+  answerCode?: string;
   starterCode?: string;
   publicTestCases: ExerciseTestCase[];
 }

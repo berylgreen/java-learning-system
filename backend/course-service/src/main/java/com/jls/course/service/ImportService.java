@@ -37,6 +37,7 @@ public class ImportService {
     private static final Pattern LESSON_INDEX_PATTERN = Pattern.compile("^(\\d+)(?:\\.\\d+)?");
     private static final Pattern EXERCISE_MARKER_PATTERN = Pattern.compile("^\\s*-\\s*(.+?)\\s*[：:]\\s*(.+)$");
     private static final Pattern EXERCISE_HINT_PATTERN = Pattern.compile("^\\s*\\*\\s*提示\\s*[：:]\\s*(.+)$");
+    private static final Pattern EXERCISE_ANSWER_PATTERN = Pattern.compile("^\\s*\\*\\s*答案\\s*[：:]\\s*(.+)$");
     private static final Pattern EXERCISE_CASE_PATTERN = Pattern.compile("^\\s*\\*\\s*(公开|隐藏)\\s*\\|\\s*输入\\s*[：:]\\s*(.*?)\\s*\\|\\s*输出\\s*[：:]\\s*(.*?)\\s*$");
 
     private final CourseRepository courseRepository;
@@ -171,6 +172,15 @@ public class ImportService {
                 continue;
             }
 
+            Matcher answerMatcher = EXERCISE_ANSWER_PATTERN.matcher(line.trim());
+            if (answerMatcher.matches() && currentLessonTitle != null) {
+                ExerciseConfig config = result.get(currentLessonTitle);
+                if (config != null) {
+                    config.setAnswerCode(unescapeMultilineValue(answerMatcher.group(1).trim()));
+                }
+                continue;
+            }
+
             Matcher caseMatcher = EXERCISE_CASE_PATTERN.matcher(line.trim());
             if (caseMatcher.matches() && currentLessonTitle != null) {
                 ExerciseConfig config = result.get(currentLessonTitle);
@@ -203,6 +213,13 @@ public class ImportService {
         return "(空)".equals(normalized) ? "" : normalized;
     }
 
+    private String unescapeMultilineValue(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replace("\\n", "\n");
+    }
+
     private void upsertExerciseForLesson(Lesson lesson) {
         upsertExerciseForLesson(lesson, null);
     }
@@ -218,6 +235,11 @@ public class ImportService {
                 ? buildDefaultHint(lesson.getTitle())
                 : configuredExercise.getHint();
 
+        String finalAnswerCode = configuredExercise == null || configuredExercise.getAnswerCode() == null
+                || configuredExercise.getAnswerCode().isBlank()
+                ? null
+                : configuredExercise.getAnswerCode();
+
         String publicCasesJson = resolvePublicCasesJson(lesson.getTitle(), configuredExercise);
         String hiddenCasesJson = resolveHiddenCasesJson(lesson.getTitle(), configuredExercise);
 
@@ -226,6 +248,7 @@ public class ImportService {
             existing.setDescription(finalDescription);
             existing.setStarterCode(buildStarterCode(lesson.getTitle()));
             existing.setAnswerHint(finalHint);
+            existing.setAnswerCode(finalAnswerCode);
             existing.setPublicTestCasesJson(publicCasesJson);
             existing.setHiddenTestCasesJson(hiddenCasesJson);
             existing.setPassRule("ALL_PASS");
@@ -237,6 +260,7 @@ public class ImportService {
                     .description(finalDescription)
                     .starterCode(buildStarterCode(lesson.getTitle()))
                     .answerHint(finalHint)
+                    .answerCode(finalAnswerCode)
                     .publicTestCasesJson(publicCasesJson)
                     .hiddenTestCasesJson(hiddenCasesJson)
                     .passRule("ALL_PASS")
@@ -581,6 +605,7 @@ public class ImportService {
     private static class ExerciseConfig {
         private String description;
         private String hint;
+        private String answerCode;
         private List<ExerciseTestCaseDTO> publicCases = new ArrayList<>();
         private List<ExerciseTestCaseDTO> hiddenCases = new ArrayList<>();
     }
