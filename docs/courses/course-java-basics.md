@@ -1304,6 +1304,7 @@ System.out.println("同一个对象: " + (s1.hashCode() == s2.hashCode()));
 ## 课后习题配置（导入用）
 
 - 1.1 Hello World - 第一个 Java 程序：实现 `solution(String input)`，返回 `"Hello, " + input`。
+  * 提示: 直接使用字符串拼接，注意保留逗号和空格。
   * 公开 | 输入: Claude | 输出: Hello, Claude
   * 隐藏 | 输入: Bot | 输出: Hello, Bot
 - 1.2 Java 程序结构与注释：实现 `solution(String input)`，删除 `//` 与 `/* */` 注释标记字符后返回结果字符串。

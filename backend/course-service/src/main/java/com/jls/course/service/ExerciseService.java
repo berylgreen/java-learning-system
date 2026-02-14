@@ -60,6 +60,7 @@ public class ExerciseService {
                 .title(exercise.getTitle())
                 .description(exercise.getDescription())
                 .starterCode(exercise.getStarterCode())
+                .answerHint(exercise.getAnswerHint())
                 .publicTestCases(parseTestCases(exercise.getPublicTestCasesJson()))
                 .build();
     }

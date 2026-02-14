@@ -56,6 +56,7 @@ function App() {
   const [isLoadingExercise, setIsLoadingExercise] = useState(false);
   const [isSubmittingExercise, setIsSubmittingExercise] = useState(false);
   const [exerciseError, setExerciseError] = useState<string | null>(null);
+  const [isHintVisible, setIsHintVisible] = useState(false);
 
   const lessonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
 
@@ -275,12 +276,14 @@ function App() {
       setExercise(null);
       setExerciseResult(null);
       setExerciseError(null);
+      setIsHintVisible(false);
       return;
     }
 
     const loadExercise = async () => {
       setIsLoadingExercise(true);
       setExerciseError(null);
+      setIsHintVisible(false);
       try {
         const exerciseData = await getLessonExercise(selectedLessonId);
         setExercise(exerciseData);
@@ -623,6 +626,14 @@ function App() {
                     </button>
                     <button
                       type="button"
+                      className="exercise-btn secondary"
+                      onClick={() => setIsHintVisible((prev) => !prev)}
+                      disabled={!exercise?.answerHint}
+                    >
+                      {isHintVisible ? '隐藏提示' : '查看提示'}
+                    </button>
+                    <button
+                      type="button"
                       className="exercise-btn primary"
                       onClick={handleSubmitExercise}
                       disabled={isSubmittingExercise || !exercise}
@@ -641,6 +652,12 @@ function App() {
                       <div className="exercise-description">
                         <div className="exercise-subtitle">题目要求</div>
                         <ReactMarkdown>{exercise.description}</ReactMarkdown>
+                      </div>
+                    )}
+                    {isHintVisible && exercise.answerHint && (
+                      <div className="exercise-hint">
+                        <div className="exercise-subtitle">提示答案</div>
+                        <ReactMarkdown>{exercise.answerHint}</ReactMarkdown>
                       </div>
                     )}
                     {exercise.publicTestCases?.length > 0 && (

@@ -96,6 +96,7 @@ class ImportServiceTest {
                 .findFirst()
                 .orElseThrow();
         assertEquals("实现 `solution(String input)`，返回 `\"Hello, \" + input`。", helloLessonExercise.getDescription());
+        assertEquals("直接使用字符串拼接，注意保留逗号和空格。", helloLessonExercise.getAnswerHint());
         assertTrue(helloLessonExercise.getPublicTestCasesJson().contains("Hello, Claude"));
         assertTrue(helloLessonExercise.getHiddenTestCasesJson().contains("Hello, Bot"));
 

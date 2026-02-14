@@ -53,6 +53,7 @@ export interface Exercise {
   lessonId: number;
   title: string;
   description?: string;
+  answerHint?: string;
   starterCode?: string;
   publicTestCases: ExerciseTestCase[];
 }

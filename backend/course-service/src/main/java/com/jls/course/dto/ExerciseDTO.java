@@ -17,5 +17,6 @@ public class ExerciseDTO {
     private String title;
     private String description;
     private String starterCode;
+    private String answerHint;
     private List<ExerciseTestCaseDTO> publicTestCases;
 }

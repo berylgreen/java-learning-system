@@ -36,6 +36,7 @@ public class ImportService {
     private static final String EXERCISE_CONFIG_SECTION_TITLE = "## 课后习题配置（导入用）";
     private static final Pattern LESSON_INDEX_PATTERN = Pattern.compile("^(\\d+)(?:\\.\\d+)?");
     private static final Pattern EXERCISE_MARKER_PATTERN = Pattern.compile("^\\s*-\\s*(.+?)\\s*[：:]\\s*(.+)$");
+    private static final Pattern EXERCISE_HINT_PATTERN = Pattern.compile("^\\s*\\*\\s*提示\\s*[：:]\\s*(.+)$");
     private static final Pattern EXERCISE_CASE_PATTERN = Pattern.compile("^\\s*\\*\\s*(公开|隐藏)\\s*\\|\\s*输入\\s*[：:]\\s*(.*?)\\s*\\|\\s*输出\\s*[：:]\\s*(.*?)\\s*$");
 
     private final CourseRepository courseRepository;
@@ -161,6 +162,15 @@ public class ImportService {
                 continue;
             }
 
+            Matcher hintMatcher = EXERCISE_HINT_PATTERN.matcher(line.trim());
+            if (hintMatcher.matches() && currentLessonTitle != null) {
+                ExerciseConfig config = result.get(currentLessonTitle);
+                if (config != null) {
+                    config.setHint(hintMatcher.group(1).trim());
+                }
+                continue;
+            }
+
             Matcher caseMatcher = EXERCISE_CASE_PATTERN.matcher(line.trim());
             if (caseMatcher.matches() && currentLessonTitle != null) {
                 ExerciseConfig config = result.get(currentLessonTitle);
@@ -203,6 +213,11 @@ public class ImportService {
                 ? buildExerciseDescription(lesson.getTitle())
                 : configuredExercise.getDescription();
 
+        String finalHint = configuredExercise == null || configuredExercise.getHint() == null
+                || configuredExercise.getHint().isBlank()
+                ? buildDefaultHint(lesson.getTitle())
+                : configuredExercise.getHint();
+
         String publicCasesJson = resolvePublicCasesJson(lesson.getTitle(), configuredExercise);
         String hiddenCasesJson = resolveHiddenCasesJson(lesson.getTitle(), configuredExercise);
 
@@ -210,6 +225,7 @@ public class ImportService {
             existing.setTitle(buildExerciseTitle(lesson.getTitle()));
             existing.setDescription(finalDescription);
             existing.setStarterCode(buildStarterCode(lesson.getTitle()));
+            existing.setAnswerHint(finalHint);
             existing.setPublicTestCasesJson(publicCasesJson);
             existing.setHiddenTestCasesJson(hiddenCasesJson);
             existing.setPassRule("ALL_PASS");
@@ -220,6 +236,7 @@ public class ImportService {
                     .title(buildExerciseTitle(lesson.getTitle()))
                     .description(finalDescription)
                     .starterCode(buildStarterCode(lesson.getTitle()))
+                    .answerHint(finalHint)
                     .publicTestCasesJson(publicCasesJson)
                     .hiddenTestCasesJson(hiddenCasesJson)
                     .passRule("ALL_PASS")
@@ -248,6 +265,10 @@ public class ImportService {
 
     private String buildExerciseDescription(String lessonTitle) {
         return "请实现函数 solution(String input)，完成“" + lessonTitle + "”对应知识点练习。";
+    }
+
+    private String buildDefaultHint(String lessonTitle) {
+        return "先梳理输入输出格式，再按题目要求分步骤实现 solution。";
     }
 
     private String buildStarterCode(String lessonTitle) {
@@ -559,6 +580,7 @@ public class ImportService {
     @Data
     private static class ExerciseConfig {
         private String description;
+        private String hint;
         private List<ExerciseTestCaseDTO> publicCases = new ArrayList<>();
         private List<ExerciseTestCaseDTO> hiddenCases = new ArrayList<>();
     }

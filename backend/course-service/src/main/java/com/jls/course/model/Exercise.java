@@ -46,6 +46,9 @@ public class Exercise {
     @Column(columnDefinition = "TEXT")
     private String hiddenTestCasesJson;
 
+    @Column(columnDefinition = "TEXT")
+    private String answerHint;
+
     @Column(nullable = false)
     @Builder.Default
     private String passRule = "ALL_PASS";
