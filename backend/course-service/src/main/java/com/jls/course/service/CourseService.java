@@ -5,9 +5,13 @@ import com.jls.course.dto.LessonDTO;
 import com.jls.course.dto.LessonDetailDTO;
 import com.jls.course.dto.ModuleDTO;
 import com.jls.course.model.Course;
+import com.jls.course.model.Exercise;
+import com.jls.course.model.ExerciseSubmission;
 import com.jls.course.model.Lesson;
 import com.jls.course.model.Module;
 import com.jls.course.repository.CourseRepository;
+import com.jls.course.repository.ExerciseRepository;
+import com.jls.course.repository.ExerciseSubmissionRepository;
 import com.jls.course.repository.LessonRepository;
 import com.jls.course.repository.ModuleRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final ModuleRepository moduleRepository;
     private final LessonRepository lessonRepository;
+    private final ExerciseRepository exerciseRepository;
+    private final ExerciseSubmissionRepository exerciseSubmissionRepository;
 
     @Transactional(readOnly = true)
     public CourseStructureDTO getCourseStructure(Long courseId) {
@@ -78,10 +84,16 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
 
-        // 级联删除：Lesson → Module → Course
+        // 级联删除：ExerciseSubmission → Exercise → Lesson → Module → Course
         List<Module> modules = moduleRepository.findByCourse(course);
         for (Module module : modules) {
             List<Lesson> lessons = lessonRepository.findByModule(module);
+            List<Exercise> exercises = exerciseRepository.findByLessonIn(lessons);
+            for (Exercise exercise : exercises) {
+                List<ExerciseSubmission> submissions = exerciseSubmissionRepository.findByExercise(exercise);
+                exerciseSubmissionRepository.deleteAll(submissions);
+            }
+            exerciseRepository.deleteAll(exercises);
             lessonRepository.deleteAll(lessons);
         }
         moduleRepository.deleteAll(modules);

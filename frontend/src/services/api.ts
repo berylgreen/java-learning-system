@@ -42,6 +42,45 @@ export interface LessonDetail {
   codeSnippet?: string;
 }
 
+export interface ExerciseTestCase {
+  input: string;
+  expectedOutput: string;
+  timeoutMs: number;
+}
+
+export interface Exercise {
+  id: number;
+  lessonId: number;
+  title: string;
+  description?: string;
+  answerHint?: string;
+  answerCode?: string;
+  starterCode?: string;
+  publicTestCases: ExerciseTestCase[];
+}
+
+export interface ExerciseCaseResult {
+  input: string;
+  expectedOutput: string;
+  actualOutput: string;
+  passed: boolean;
+  error?: string;
+}
+
+export interface ExerciseSubmissionResult {
+  submissionId: number;
+  status: 'PASS' | 'FAIL' | 'ERROR';
+  score: number;
+  message: string;
+  publicResults: ExerciseCaseResult[];
+  hiddenSummary: {
+    passed: number;
+    total: number;
+  };
+  durationMs: number;
+  createdAt: string;
+}
+
 export const executeCode = async (code: string): Promise<ExecutionResult> => {
   try {
     const response = await axios.post<ExecutionResult>(`${SANDBOX_API_BASE_URL}/execute`, {
@@ -101,6 +140,31 @@ export const importCourseFromSourceIndex = async (
         'Content-Type': 'application/json',
       },
     },
+  );
+  return response.data;
+};
+
+export const getLessonExercise = async (lessonId: number): Promise<Exercise> => {
+  const response = await axios.get<Exercise>(`${COURSE_API_BASE_URL}/lessons/${lessonId}/exercise`);
+  return response.data;
+};
+
+export const submitLessonExercise = async (
+  lessonId: number,
+  code: string,
+): Promise<ExerciseSubmissionResult> => {
+  const response = await axios.post<ExerciseSubmissionResult>(
+    `${COURSE_API_BASE_URL}/lessons/${lessonId}/exercise/submissions`,
+    { code },
+  );
+  return response.data;
+};
+
+export const getLatestLessonExerciseSubmission = async (
+  lessonId: number,
+): Promise<ExerciseSubmissionResult> => {
+  const response = await axios.get<ExerciseSubmissionResult>(
+    `${COURSE_API_BASE_URL}/lessons/${lessonId}/exercise/submissions/latest`,
   );
   return response.data;
 };

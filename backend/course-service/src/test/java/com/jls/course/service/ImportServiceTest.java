@@ -3,7 +3,7 @@ package com.jls.course.service;
 import com.jls.course.model.Course;
 import com.jls.course.model.Lesson;
 import com.jls.course.model.Module;
-import com.jls.course.repository.CourseRepository;
+import com.jls.course.repository.ExerciseRepository;
 import com.jls.course.repository.LessonRepository;
 import com.jls.course.repository.ModuleRepository;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,13 +26,13 @@ class ImportServiceTest {
     private ImportService importService;
 
     @Autowired
-    private CourseRepository courseRepository;
-
-    @Autowired
     private ModuleRepository moduleRepository;
 
     @Autowired
     private LessonRepository lessonRepository;
+
+    @Autowired
+    private ExerciseRepository exerciseRepository;
 
     @Test
     void testImportSimpleCourse() {
@@ -57,6 +58,61 @@ class ImportServiceTest {
         assertEquals("Hello World", lessons.get(0).getTitle());
         assertTrue(lessons.get(0).getContent().contains("Welcome to Java."));
         assertEquals("System.out.println(\"Hello\");", lessons.get(0).getCodeSnippet().trim());
+
+        var exercise = exerciseRepository.findByLesson(lessons.get(0));
+        assertTrue(exercise.isPresent());
+        assertEquals("Hello World - 练习", exercise.get().getTitle());
+        assertNotNull(exercise.get().getStarterCode());
+        assertTrue(exercise.get().getPublicTestCasesJson().contains("expectedOutput"));
+        assertTrue(exercise.get().getHiddenTestCasesJson().contains("expectedOutput"));
+    }
+
+    @Test
+    void testImportMarkdownFileShouldCreateExerciseForEveryLesson() throws Exception {
+        String markdown = Files.readString(Paths.get("..", "..", "docs", "courses", "course-java-basics.md"));
+
+        Course course = importService.importCourse(markdown);
+        List<Module> modules = moduleRepository.findByCourse(course);
+        assertFalse(modules.isEmpty());
+
+        List<Lesson> allLessons = new ArrayList<>();
+        for (Module module : modules) {
+            allLessons.addAll(lessonRepository.findByModule(module));
+        }
+
+        assertFalse(allLessons.isEmpty());
+
+        var exercises = exerciseRepository.findByLessonIn(allLessons);
+        assertEquals(allLessons.size(), exercises.size());
+
+        exercises.forEach(exercise -> {
+            assertNotNull(exercise.getStarterCode());
+            assertTrue(exercise.getPublicTestCasesJson().contains("expectedOutput"));
+            assertTrue(exercise.getHiddenTestCasesJson().contains("expectedOutput"));
+            assertNotNull(exercise.getAnswerCode());
+            assertFalse(exercise.getAnswerCode().isBlank());
+        });
+
+        var helloLessonExercise = exercises.stream()
+                .filter(exercise -> "1.1 Hello World - 第一个 Java 程序".equals(exercise.getLesson().getTitle()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("实现 `solution(String input)`，返回 `\"Hello, \" + input`。", helloLessonExercise.getDescription());
+        assertEquals("直接返回 `\"Hello, \" + input`；注意逗号后必须有一个空格，且不要追加换行或多余空格；输入为空时也按同样规则拼接。", helloLessonExercise.getAnswerHint());
+        assertEquals("String solution(String input){\n    return \"Hello, \" + input;\n}", helloLessonExercise.getAnswerCode());
+        assertTrue(helloLessonExercise.getAnswerCode().contains("\n"));
+        assertFalse(helloLessonExercise.getAnswerCode().contains("\\n"));
+        assertTrue(helloLessonExercise.getPublicTestCasesJson().contains("Hello, Claude"));
+        assertTrue(helloLessonExercise.getHiddenTestCasesJson().contains("Hello, Bot"));
+
+        var singletonLessonExercise = exercises.stream()
+                .filter(exercise -> "9.5 单例模式与线程安全".equals(exercise.getLesson().getTitle()))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("实现 `solution(String input)`，无论输入什么都返回固定实例标识 `SINGLETON_INSTANCE`。", singletonLessonExercise.getDescription());
+        assertEquals("String solution(String input){ return \"SINGLETON_INSTANCE\"; }", singletonLessonExercise.getAnswerCode());
+        assertTrue(singletonLessonExercise.getPublicTestCasesJson().contains("SINGLETON_INSTANCE"));
+        assertTrue(singletonLessonExercise.getHiddenTestCasesJson().contains("SINGLETON_INSTANCE"));
     }
 
     @Test
@@ -77,5 +133,9 @@ class ImportServiceTest {
         assertEquals("HelloWorld", chapterOneLessons.get(0).getTitle());
         assertNotNull(chapterOneLessons.get(0).getCodeSnippet());
         assertFalse(chapterOneLessons.get(0).getCodeSnippet().isBlank());
+
+        var exercise = exerciseRepository.findByLesson(chapterOneLessons.get(0));
+        assertTrue(exercise.isPresent());
+        assertEquals("HelloWorld - 练习", exercise.get().getTitle());
     }
 }
